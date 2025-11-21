@@ -118,6 +118,7 @@ public class ClassicDataGenerator {
         // Обрабатываем parameters из Operation
         Set<String> queryNames = new HashSet<>();
         Set<String> pathNames = new HashSet<>();
+        Set<String> headerNames = new HashSet<>();
         if (operation != null && operation.getParameters() != null) {
             for (Parameter param : operation.getParameters()) {
                 String paramName = param.getName();
@@ -126,10 +127,17 @@ public class ClassicDataGenerator {
                     queryNames.add(paramName);
                 } else if ("path".equalsIgnoreCase(paramIn)) {
                     pathNames.add(paramName);
+                } else if ("header".equalsIgnoreCase(paramIn)) {
+                    headerNames.add(paramName);
                 }
                 
-                // Пропускаем, если уже добавили из path
-                if (requestData.containsKey(paramName)) {
+                // Пропускаем path параметры, так как они уже обработаны в extractPathParameters
+                if ("path".equalsIgnoreCase(paramIn) && requestData.containsKey(paramName)) {
+                    continue;
+                }
+                
+                // Пропускаем header параметры - они не должны попадать в requestData или queryParams
+                if ("header".equalsIgnoreCase(paramIn)) {
                     continue;
                 }
                 
@@ -151,9 +159,12 @@ public class ClassicDataGenerator {
                         }
                     }
                     
+                    // Query параметры идут в queryParams, остальные (кроме header) - в requestData
+                    // Но только если это не query и не header
                     if ("query".equalsIgnoreCase(paramIn)) {
                         queryParams.put(paramName, value);
-                    } else {
+                    } else if (!"header".equalsIgnoreCase(paramIn)) {
+                        // Только если это не header и не query
                         requestData.put(paramName, value);
                     }
                 }
@@ -178,19 +189,56 @@ public class ClassicDataGenerator {
             for (Map.Entry<String, Object> e : requestOverrides.entrySet()) {
                 String key = e.getKey();
                 Object val = e.getValue();
-                // Определяем размещение параметра: query или body
-                Placement placement = determinePlacementForOverride(key, operation, openApiModel, endpointPath, endpointMethod, queryNames);
-                if (placement == Placement.QUERY) {
+                
+                // Проверяем, является ли параметр query/path/header согласно OpenAPI
+                boolean isQuery = queryNames.contains(key);
+                boolean isPath = pathNames.contains(key);
+                boolean isHeader = headerNames.contains(key);
+                
+                // Если параметр определен в OpenAPI, используем его размещение
+                if (isQuery) {
                     queryParams.put(key, val);
-                } else if (placement == Placement.PATH) {
-                    // path-параметры уже должны быть извлечены из endpointPath, но на случай явного override
+                    // Удаляем из requestData, если там есть
+                    requestData.remove(key);
+                } else if (isPath) {
+                    // path-параметры идут в requestData (для подстановки в URL)
                     requestData.put(key, val);
+                } else if (isHeader) {
+                    // header параметры не должны попадать ни в requestData, ни в queryParams
+                    // Они будут обработаны отдельно при формировании заголовков
+                    requestData.remove(key);
                 } else {
-                    requestData.put(key, val);
+                    // Если параметр не определен в OpenAPI, определяем размещение эвристически
+                    Placement placement = determinePlacementForOverride(key, operation, openApiModel, endpointPath, endpointMethod, queryNames);
+                    if (placement == Placement.QUERY) {
+                        queryParams.put(key, val);
+                        requestData.remove(key);
+                    } else if (placement == Placement.PATH) {
+                        requestData.put(key, val);
+                    } else {
+                        // По умолчанию в body (requestData), но только если есть requestBody в OpenAPI
+                        if (operation != null && operation.getRequestBody() != null) {
+                            requestData.put(key, val);
+                        } else {
+                            // Если нет requestBody, возможно это query параметр
+                            queryParams.put(key, val);
+                        }
+                    }
                 }
             }
         }
 
+        // Финальная очистка: удаляем query параметры из requestData
+        // (они должны быть только в queryParams)
+        for (String queryKey : queryParams.keySet()) {
+            requestData.remove(queryKey);
+        }
+        
+        // Также удаляем header параметры из requestData
+        for (String headerKey : headerNames) {
+            requestData.remove(headerKey);
+        }
+        
         // Эвристика для GET: если остались overrides в body, перенести их в query
         if ("GET".equalsIgnoreCase(endpointMethod)) {
             if (requestOverrides != null) {
@@ -202,6 +250,19 @@ public class ClassicDataGenerator {
                 }
             }
         }
+        
+        // Если в OpenAPI нет requestBody, очищаем requestData от всех параметров, кроме path
+        if (operation != null && operation.getRequestBody() == null) {
+            // Оставляем только path параметры
+            Map<String, Object> pathParamsOnly = new HashMap<>();
+            for (String pathKey : pathNames) {
+                if (requestData.containsKey(pathKey)) {
+                    pathParamsOnly.put(pathKey, requestData.get(pathKey));
+                }
+            }
+            requestData = pathParamsOnly;
+        }
+        
         step.setRequestData(requestData);
         step.setQueryParams(queryParams);
     }

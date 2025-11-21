@@ -324,5 +324,200 @@ export interface TestFlowState {
   error?: string | null;
   aiModels?: { id: number; name: string }[];
   selectedModelId?: number | null;
+  openApiJson?: string;
+  bpmnXml?: string;
+  globalOverrides?: Record<string, unknown>;
+  commonOverrides?: Record<string, unknown>;
+}
+
+// Типы для генерации тестовых данных
+export type GenerationType = "CLASSIC" | "AI";
+
+export interface TestDataStep {
+  taskId: string;
+  taskName: string;
+  requestData?: Record<string, unknown>;
+  queryParams?: Record<string, unknown>;
+  responseData?: Record<string, unknown>;
+  dataDependencies?: Record<string, string>;
+}
+
+export interface GenerationStatistics {
+  totalFieldsGenerated: number;
+  smartFieldsGenerated: number;
+  exampleBasedFields: number;
+  generationTimeMs: number;
+  validityPercentage: number;
+}
+
+export interface TestDataGenerationResult {
+  generationType: GenerationType;
+  scenario: string;
+  variants: TestDataStep[][];
+  crossStepDependencies?: Record<string, string>;
+  statistics?: GenerationStatistics;
+}
+
+export interface TestDataGenerationRequest {
+  generationType: GenerationType;
+  mappingResult: MappingResultDto;
+  openApiJson: string;
+  scenario?: string;
+  variantsCount?: number;
+}
+
+// Типы для выполнения тестов
+export type ExecutionStatus = "SUCCESS" | "FAILED" | "PARTIAL";
+
+export type StepStatus = "SUCCESS" | "FAILED" | "SKIPPED";
+
+export interface RequestDetails {
+  url: string;
+  method: string;
+  headers?: Record<string, string>;
+  body?: string;
+  timestamp?: string;
+}
+
+export interface ResponseDetails {
+  statusCode: number;
+  headers?: Record<string, string>;
+  body?: string;
+  responseTimeMs: number;
+  timestamp?: string;
+}
+
+export interface StatusCodeValidation {
+  isValid: boolean;
+  expectedStatusCode: number;
+  actualStatusCode: number;
+  message?: string;
+}
+
+export interface SchemaValidation {
+  isValid: boolean;
+  message?: string;
+  schemaErrors?: string[];
+}
+
+export interface ContractValidation {
+  isValid: boolean;
+  expectedContentType?: string;
+  actualContentType?: string;
+  missingRequiredFields?: string[];
+  message?: string;
+}
+
+export interface PerformanceValidation {
+  isValid: boolean;
+  responseTimeMs: number;
+  maxAllowedTimeMs: number;
+  message?: string;
+}
+
+export interface ValidationResult {
+  isValid: boolean;
+  statusCodeValidation?: StatusCodeValidation;
+  schemaValidation?: SchemaValidation;
+  contractValidation?: ContractValidation;
+  performanceValidation?: PerformanceValidation;
+  errors?: string[];
+  warnings?: string[];
+}
+
+export interface TestExecutionStepResult {
+  taskId: string;
+  taskName: string;
+  status: StepStatus;
+  startTime?: string;
+  endTime?: string;
+  durationMs: number;
+  request?: RequestDetails;
+  response?: ResponseDetails;
+  validation?: ValidationResult;
+  extractedData?: Record<string, unknown>;
+  errorMessage?: string;
+}
+
+export type ProblemType =
+  | "TIMEOUT"
+  | "NETWORK_ERROR"
+  | "HTTP_ERROR"
+  | "VALIDATION_ERROR"
+  | "SCHEMA_ERROR"
+  | "CONTRACT_ERROR"
+  | "BUSINESS_LOGIC_ERROR"
+  | "UNEXPECTED_RESPONSE"
+  | "DATA_EXTRACTION_ERROR";
+
+export type ProblemSeverity = "ERROR" | "WARNING" | "INFO";
+
+export interface ExecutionProblem {
+  type: ProblemType;
+  stepId: string;
+  stepName: string;
+  severity: ProblemSeverity;
+  message: string;
+  details?: string;
+  timestamp?: string;
+  requestUrl?: string;
+  requestMethod?: string;
+}
+
+export interface ExecutionStatistics {
+  totalSteps: number;
+  successfulSteps: number;
+  failedSteps: number;
+  skippedSteps: number;
+  averageStepDurationMs: number;
+  minStepDurationMs: number;
+  maxStepDurationMs: number;
+  totalRequests: number;
+  successfulRequests: number;
+  validationErrors: number;
+}
+
+export interface TestExecutionResult {
+  status: ExecutionStatus;
+  startTime: string;
+  endTime?: string;
+  totalDurationMs: number;
+  steps: TestExecutionStepResult[];
+  problems?: ExecutionProblem[];
+  statistics?: ExecutionStatistics;
+  processId?: string;
+  processName?: string;
+}
+
+export type AuthType = "NONE" | "BASIC" | "BEARER" | "API_KEY";
+
+export interface AuthConfig {
+  type: AuthType;
+  value?: string;
+  username?: string;
+  password?: string;
+  headerName?: string;
+}
+
+export interface ExecutionConfig {
+  baseUrl: string;
+  defaultHeaders?: Record<string, string>;
+  authConfig?: AuthConfig;
+  requestTimeoutMs?: number;
+  connectionTimeoutMs?: number;
+  retryCount?: number;
+  retryDelayMs?: number;
+  maxExecutionTimeMs?: number;
+}
+
+export interface TestExecutionRequest {
+  bpmnXml: string;
+  openApiJson?: string;
+  testDataJson: string;
+  mappingResultJson: string;
+  baseUrl: string;
+  variantIndex?: number;
+  stopOnFirstError?: boolean;
+  config?: ExecutionConfig;
 }
 

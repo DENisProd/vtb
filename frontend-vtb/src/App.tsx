@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import { AppLayout } from "@/layout/AppLayout";
 import AnalysisPage from "@/pages/AnalysisPage";
+import ApiTestPage from "@/pages/ApiTestPage";
 import ArtifactsPage from "@/pages/ArtifactsPage";
 import CanvasPage from "@/pages/CanvasPage";
 import DataGeneratorPage from "@/pages/DataGeneratorPage";
@@ -23,6 +24,7 @@ const App = () => (
       <Route element={<AnalysisPage />} path="/analysis" />
       <Route element={<ScenariosPage />} path="/scenarios" />
       <Route element={<DataGeneratorPage />} path="/data" />
+      <Route element={<ApiTestPage />} path="/api-test" />
       <Route element={<RunnerPage />} path="/runner" />
       <Route element={<CanvasPage />} path="/canvas" />
       <Route element={<ReportsPage />} path="/reports" />

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import ru.poib.VTBHack.generator.model.TestDataGenerationResult;
 import ru.poib.VTBHack.mapping.model.MappingResult;
 import ru.poib.VTBHack.parser.model.ProcessModel;
+import ru.poib.VTBHack.parser.model.openapi.OpenApiModel;
 
 /**
  * Запрос на выполнение тестов
@@ -33,6 +34,11 @@ public class TestExecutionRequest {
      * Конфигурация окружения
      */
     private ExecutionConfig config;
+    
+    /**
+     * OpenAPI модель для проверки параметров запросов
+     */
+    private OpenApiModel openApiModel;
     
     /**
      * Индекс варианта тестовых данных для выполнения (по умолчанию 0)

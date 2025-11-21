@@ -12,6 +12,7 @@ import ru.poib.VTBHack.generator.model.TestDataGenerationResult;
 import ru.poib.VTBHack.mapping.model.MappingResult;
 import ru.poib.VTBHack.parser.model.ProcessModel;
 import ru.poib.VTBHack.parser.service.BpmnParserService;
+import ru.poib.VTBHack.parser.service.OpenApiParserService;
 
 /**
  * REST контроллер для модуля выполнения тестов
@@ -24,6 +25,7 @@ public class TestExecutionController {
     
     private final TestExecutionService testExecutionService;
     private final BpmnParserService bpmnParserService;
+    private final OpenApiParserService openApiParserService;
     
     /**
      * Выполняет тест с полным запросом
@@ -67,6 +69,12 @@ public class TestExecutionController {
             // Парсим входные данные
             ProcessModel processModel = bpmnParserService.parse(bpmnXml);
             
+            // Парсим OpenAPI если предоставлен
+            ru.poib.VTBHack.parser.model.openapi.OpenApiModel openApiModel = null;
+            if (openApiJson != null && !openApiJson.isEmpty()) {
+                openApiModel = openApiParserService.parseOpenApi(openApiJson);
+            }
+            
             // Парсим тестовые данные и маппинг (нужно использовать ObjectMapper)
             com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
             TestDataGenerationResult testData = objectMapper.readValue(testDataJson, TestDataGenerationResult.class);
@@ -92,6 +100,7 @@ public class TestExecutionController {
             request.setMappingResult(mappingResult);
             request.setTestData(testData);
             request.setConfig(config);
+            request.setOpenApiModel(openApiModel);
             request.setTestDataVariantIndex(variantIndex);
             request.setStopOnFirstError(stopOnFirstError);
             

@@ -9,6 +9,9 @@ import ru.poib.VTBHack.mapping.model.DataFlowEdge;
 import ru.poib.VTBHack.mapping.model.MappingResult;
 import ru.poib.VTBHack.mapping.model.TaskEndpointMapping;
 import ru.poib.VTBHack.parser.model.ProcessModel;
+import ru.poib.VTBHack.parser.model.openapi.OpenApiModel;
+import ru.poib.VTBHack.parser.model.openapi.Operation;
+import ru.poib.VTBHack.parser.model.openapi.Parameter;
 
 import java.time.Instant;
 import java.util.*;
@@ -55,6 +58,7 @@ public class TestExecutionService {
         ProcessModel processModel = request.getProcessModel();
         MappingResult mappingResult = request.getMappingResult();
         ExecutionConfig config = request.getConfig();
+        OpenApiModel openApiModel = request.getOpenApiModel();
         
         result.setProcessId(processModel.getId());
         result.setProcessName(processModel.getName());
@@ -177,7 +181,8 @@ public class TestExecutionService {
                         testDataMap.get(taskId),
                         config,
                         executionContext,
-                        mappingResult
+                        mappingResult,
+                        openApiModel
                 );
                 
                 result.getSteps().add(stepResult);
@@ -247,7 +252,8 @@ public class TestExecutionService {
             TestDataStep testData,
             ExecutionConfig config,
             Map<String, Object> executionContext,
-            MappingResult mappingResult) {
+            MappingResult mappingResult,
+            OpenApiModel openApiModel) {
         
         Instant stepStartTime = Instant.now();
         TestExecutionStep step = new TestExecutionStep();
@@ -257,17 +263,20 @@ public class TestExecutionService {
         step.setStatus(TestExecutionStep.StepStatus.FAILED);
         
         try {
+            // Получаем Operation из OpenAPI для правильного разделения параметров
+            Operation operation = findOperation(openApiModel, mapping.getEndpointPath(), mapping.getEndpointMethod());
+            
             // Формируем URL с query параметрами и подстановкой path
-            String url = buildUrl(config.getBaseUrl(), mapping.getEndpointPath(), executionContext, testData);
+            String url = buildUrl(config.getBaseUrl(), mapping.getEndpointPath(), executionContext, testData, operation);
             
             // Формируем тело запроса (до формирования заголовков, чтобы извлечь x-* поля)
-            Object requestBody = buildRequestBody(testData, mapping, executionContext);
+            Object requestBody = buildRequestBody(testData, mapping, executionContext, operation);
             
             // Извлекаем x-* поля из requestData для заголовков
-            Map<String, String> xHeaders = extractXHeaders(testData, requestBody);
+            Map<String, String> xHeaders = extractXHeaders(testData, requestBody, operation);
             
             // Формируем заголовки (с учётом данных из предыдущих шагов и зависимостей)
-            Map<String, String> headers = buildHeaders(config, mapping, taskId, mappingResult, executionContext, xHeaders);
+            Map<String, String> headers = buildHeaders(config, mapping, taskId, mappingResult, executionContext, xHeaders, operation, testData);
             
             // Выполняем HTTP запрос
             HttpRequestExecutor.ExecutionResult httpResult = httpRequestExecutor.execute(
@@ -348,56 +357,180 @@ public class TestExecutionService {
         return step;
     }
     
-    private String buildUrl(String baseUrl, String endpointPath, Map<String, Object> context, TestDataStep testData) {
+    /**
+     * Находит Operation из OpenAPI по path и method
+     */
+    private Operation findOperation(OpenApiModel openApiModel, String path, String method) {
+        if (openApiModel == null || openApiModel.getPaths() == null || path == null || method == null) {
+            return null;
+        }
+        
+        // Сначала пробуем точное совпадение
+        OpenApiModel.PathItem pathItem = openApiModel.getPaths().get(path);
+        
+        // Если не найдено, пробуем найти по шаблону
+        if (pathItem == null) {
+            pathItem = findPathItemByTemplate(openApiModel.getPaths(), path);
+        }
+        
+        if (pathItem == null) {
+            return null;
+        }
+        
+        switch (method.toUpperCase()) {
+            case "GET":
+                return pathItem.getGet();
+            case "POST":
+                return pathItem.getPost();
+            case "PUT":
+                return pathItem.getPut();
+            case "DELETE":
+                return pathItem.getDelete();
+            default:
+                return null;
+        }
+    }
+    
+    /**
+     * Находит PathItem по шаблону пути
+     */
+    private OpenApiModel.PathItem findPathItemByTemplate(Map<String, OpenApiModel.PathItem> paths, String targetPath) {
+        if (paths == null || targetPath == null) {
+            return null;
+        }
+        
+        for (Map.Entry<String, OpenApiModel.PathItem> entry : paths.entrySet()) {
+            String templatePath = entry.getKey();
+            // Простая проверка: заменяем {param} на .+ и проверяем соответствие
+            String regex = templatePath.replaceAll("\\{[^}]+\\}", "[^/]+");
+            if (targetPath.matches(regex)) {
+                return entry.getValue();
+            }
+        }
+        
+        return null;
+    }
+    
+    private String buildUrl(String baseUrl, String endpointPath, Map<String, Object> context, TestDataStep testData, Operation operation) {
         String url = baseUrl;
         if (!url.endsWith("/") && !endpointPath.startsWith("/")) {
             url += "/";
         }
         url += endpointPath.startsWith("/") ? endpointPath.substring(1) : endpointPath;
         
+        // Собираем все параметры из тестовых данных
+        Map<String, Object> allParams = new HashMap<>();
+        if (testData != null) {
+            if (testData.getRequestData() != null) {
+                allParams.putAll(testData.getRequestData());
+            }
+            if (testData.getQueryParams() != null) {
+                allParams.putAll(testData.getQueryParams());
+            }
+        }
+        
         // Подстановка переменных из контекста (например, {id} -> значение из context)
         for (Map.Entry<String, Object> entry : context.entrySet()) {
             url = url.replace("{" + entry.getKey() + "}", String.valueOf(entry.getValue()));
         }
-        // Подстановка переменных из тестовых данных (path могут быть сгенерированы)
-        if (testData != null) {
-            Map<String, Object> rd = testData.getRequestData();
-            if (rd != null) {
-                for (Map.Entry<String, Object> entry : rd.entrySet()) {
-                    url = url.replace("{" + entry.getKey() + "}", String.valueOf(entry.getValue()));
+        
+        // Подстановка path параметров из тестовых данных
+        if (testData != null && testData.getRequestData() != null) {
+            for (Map.Entry<String, Object> entry : testData.getRequestData().entrySet()) {
+                String key = entry.getKey();
+                // Проверяем, является ли параметр path параметром согласно OpenAPI
+                if (isPathParameter(operation, key) || (endpointPath != null && endpointPath.contains("{" + key + "}"))) {
+                    url = url.replace("{" + key + "}", String.valueOf(entry.getValue()));
                 }
-            }
-            Map<String, Object> qp = testData.getQueryParams();
-            if (qp != null) {
-                for (Map.Entry<String, Object> entry : qp.entrySet()) {
-                    url = url.replace("{" + entry.getKey() + "}", String.valueOf(entry.getValue()));
-                }
-            }
-            // Добавляем query параметры в URL
-            if (qp != null && !qp.isEmpty()) {
-                StringBuilder sb = new StringBuilder();
-                // Если URL уже содержит ?, добавляем через &
-                boolean hasQuery = url.contains("?");
-                sb.append(hasQuery ? "&" : "?");
-                Iterator<Map.Entry<String, Object>> it = qp.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry<String, Object> e = it.next();
-                    String key = e.getKey();
-                    Object val = e.getValue();
-                    String encodedVal;
-                    try {
-                        encodedVal = java.net.URLEncoder.encode(String.valueOf(val), java.nio.charset.StandardCharsets.UTF_8);
-                    } catch (Exception ex) {
-                        encodedVal = String.valueOf(val);
-                    }
-                    sb.append(key).append("=").append(encodedVal);
-                    if (it.hasNext()) sb.append("&");
-                }
-                url += sb.toString();
             }
         }
         
+        // Собираем query параметры согласно OpenAPI спецификации
+        Map<String, Object> queryParams = new HashMap<>();
+        if (testData != null && testData.getQueryParams() != null) {
+            queryParams.putAll(testData.getQueryParams());
+        }
+        
+        // Добавляем параметры из requestData, которые должны быть в query согласно OpenAPI
+        if (testData != null && testData.getRequestData() != null && operation != null) {
+            for (Map.Entry<String, Object> entry : testData.getRequestData().entrySet()) {
+                String key = entry.getKey();
+                // Если параметр определен как query в OpenAPI, добавляем его в query
+                if (isQueryParameter(operation, key)) {
+                    queryParams.put(key, entry.getValue());
+                }
+            }
+        }
+        
+        // Добавляем query параметры в URL
+        if (!queryParams.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            boolean hasQuery = url.contains("?");
+            sb.append(hasQuery ? "&" : "?");
+            Iterator<Map.Entry<String, Object>> it = queryParams.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<String, Object> e = it.next();
+                String key = e.getKey();
+                Object val = e.getValue();
+                if (val == null) continue;
+                String encodedVal;
+                try {
+                    encodedVal = java.net.URLEncoder.encode(String.valueOf(val), java.nio.charset.StandardCharsets.UTF_8);
+                } catch (Exception ex) {
+                    encodedVal = String.valueOf(val);
+                }
+                sb.append(key).append("=").append(encodedVal);
+                if (it.hasNext()) sb.append("&");
+            }
+            url += sb.toString();
+        }
+        
         return url;
+    }
+    
+    /**
+     * Проверяет, является ли параметр query параметром согласно OpenAPI
+     */
+    private boolean isQueryParameter(Operation operation, String paramName) {
+        if (operation == null || operation.getParameters() == null) {
+            return false;
+        }
+        for (Parameter param : operation.getParameters()) {
+            if (paramName.equals(param.getName()) && "query".equalsIgnoreCase(param.getIn())) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Проверяет, является ли параметр path параметром согласно OpenAPI
+     */
+    private boolean isPathParameter(Operation operation, String paramName) {
+        if (operation == null || operation.getParameters() == null) {
+            return false;
+        }
+        for (Parameter param : operation.getParameters()) {
+            if (paramName.equals(param.getName()) && "path".equalsIgnoreCase(param.getIn())) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Проверяет, является ли параметр header параметром согласно OpenAPI
+     */
+    private boolean isHeaderParameter(Operation operation, String paramName) {
+        if (operation == null || operation.getParameters() == null) {
+            return false;
+        }
+        for (Parameter param : operation.getParameters()) {
+            if (paramName.equals(param.getName()) && "header".equalsIgnoreCase(param.getIn())) {
+                return true;
+            }
+        }
+        return false;
     }
     
     private Map<String, String> buildHeaders(ExecutionConfig config,
@@ -405,7 +538,9 @@ public class TestExecutionService {
                                              String taskId,
                                              MappingResult mappingResult,
                                              Map<String, Object> context,
-                                             Map<String, String> xHeaders) {
+                                             Map<String, String> xHeaders,
+                                             Operation operation,
+                                             TestDataStep testData) {
         Map<String, String> headers = new HashMap<>();
         
         // Добавляем заголовки по умолчанию
@@ -442,7 +577,8 @@ public class TestExecutionService {
         }
         
         // Добавляем Content-Type для POST/PUT запросов
-        if (mapping.getEndpointMethod().equals("POST") || mapping.getEndpointMethod().equals("PUT")) {
+        if (mapping != null && mapping.getEndpointMethod() != null && 
+            (mapping.getEndpointMethod().equals("POST") || mapping.getEndpointMethod().equals("PUT"))) {
             headers.putIfAbsent("Content-Type", "application/json");
         }
         
@@ -491,9 +627,26 @@ public class TestExecutionService {
             log.debug("Consent header injection skipped: {}", e.getMessage());
         }
         
-        // Добавляем x-* заголовки из requestData
+        // Добавляем заголовки из requestData, которые должны быть в headers согласно OpenAPI
+        if (testData != null && testData.getRequestData() != null && operation != null) {
+            for (Map.Entry<String, Object> entry : testData.getRequestData().entrySet()) {
+                String key = entry.getKey();
+                // Если параметр определен как header в OpenAPI, добавляем его в заголовки
+                if (isHeaderParameter(operation, key)) {
+                    headers.put(key, String.valueOf(entry.getValue()));
+                }
+            }
+        }
+        
+        // Добавляем x-* заголовки из requestData (если они не определены в OpenAPI как query/path/body)
         if (xHeaders != null) {
-            headers.putAll(xHeaders);
+            for (Map.Entry<String, String> entry : xHeaders.entrySet()) {
+                String key = entry.getKey();
+                // Проверяем, что параметр не определен в OpenAPI как query или path
+                if (!isQueryParameter(operation, key) && !isPathParameter(operation, key)) {
+                    headers.put(key, entry.getValue());
+                }
+            }
         }
         
         return headers;
@@ -502,20 +655,23 @@ public class TestExecutionService {
     /**
      * Извлекает поля, начинающиеся с x-, из requestData для использования в заголовках
      */
-    private Map<String, String> extractXHeaders(TestDataStep testData, Object requestBody) {
+    private Map<String, String> extractXHeaders(TestDataStep testData, Object requestBody, Operation operation) {
         Map<String, String> xHeaders = new HashMap<>();
         
         if (testData == null || testData.getRequestData() == null) {
             return xHeaders;
         }
         
-        // Извлекаем x-* поля из requestData
+        // Извлекаем x-* поля из requestData, которые не определены в OpenAPI как query/path
         for (Map.Entry<String, Object> entry : testData.getRequestData().entrySet()) {
             String key = entry.getKey();
             if (key != null && key.toLowerCase().startsWith("x-")) {
-                Object value = entry.getValue();
-                if (value != null) {
-                    xHeaders.put(key, String.valueOf(value));
+                // Проверяем, что параметр не определен в OpenAPI как query или path
+                if (!isQueryParameter(operation, key) && !isPathParameter(operation, key)) {
+                    Object value = entry.getValue();
+                    if (value != null) {
+                        xHeaders.put(key, String.valueOf(value));
+                    }
                 }
             }
         }
@@ -527,9 +683,12 @@ public class TestExecutionService {
             for (Map.Entry<String, Object> entry : bodyMap.entrySet()) {
                 String key = entry.getKey();
                 if (key != null && key.toLowerCase().startsWith("x-")) {
-                    Object value = entry.getValue();
-                    if (value != null) {
-                        xHeaders.put(key, String.valueOf(value));
+                    // Проверяем, что параметр не определен в OpenAPI как query или path
+                    if (!isQueryParameter(operation, key) && !isPathParameter(operation, key)) {
+                        Object value = entry.getValue();
+                        if (value != null) {
+                            xHeaders.put(key, String.valueOf(value));
+                        }
                     }
                 }
             }
@@ -538,34 +697,82 @@ public class TestExecutionService {
         return xHeaders;
     }
     
-    private Object buildRequestBody(TestDataStep testData, TaskEndpointMapping mapping, Map<String, Object> context) {
+    private Object buildRequestBody(TestDataStep testData, TaskEndpointMapping mapping, Map<String, Object> context, Operation operation) {
+        String method = mapping != null ? mapping.getEndpointMethod() : null;
+        
+        // Для GET/DELETE запросов body всегда должен быть null
+        if (method != null && (method.equals("GET") || method.equals("DELETE"))) {
+            return null;
+        }
+        
+        // Если нет requestBody в OpenAPI, возвращаем null для методов без body
+        if (operation != null && operation.getRequestBody() == null) {
+            return null;
+        }
+        
         if (testData == null || testData.getRequestData() == null) {
-            // Для POST/PUT отправляем пустой JSON, чтобы тело запроса существовало
-            if (mapping != null && ("POST".equalsIgnoreCase(mapping.getEndpointMethod()) || "PUT".equalsIgnoreCase(mapping.getEndpointMethod()))) {
-                return new java.util.HashMap<String, Object>();
+            // Для POST/PUT отправляем пустой JSON, если requestBody определен в OpenAPI
+            if (method != null && ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method) || "PATCH".equalsIgnoreCase(method))) {
+                if (operation != null && operation.getRequestBody() != null) {
+                    return new java.util.HashMap<String, Object>();
+                }
             }
             return null;
         }
         
-        Map<String, Object> requestData = new HashMap<>(testData.getRequestData());
-        // Исключаем query параметры из тела
-        if (testData.getQueryParams() != null) {
-            for (String key : testData.getQueryParams().keySet()) {
-                requestData.remove(key);
+        Map<String, Object> requestData = new HashMap<>();
+        
+        // Сначала собираем только те параметры, которые НЕ являются query/path/header согласно OpenAPI
+        if (operation != null && operation.getParameters() != null) {
+            // Создаем множество имен параметров, которые являются query/path/header
+            Set<String> excludedParams = new HashSet<>();
+            for (Parameter param : operation.getParameters()) {
+                String paramName = param.getName();
+                String paramIn = param.getIn();
+                if ("query".equalsIgnoreCase(paramIn) || "path".equalsIgnoreCase(paramIn) || "header".equalsIgnoreCase(paramIn)) {
+                    excludedParams.add(paramName);
+                }
+            }
+            
+            // Добавляем в requestData только те параметры, которые НЕ исключены
+            for (Map.Entry<String, Object> entry : testData.getRequestData().entrySet()) {
+                String key = entry.getKey();
+                if (!excludedParams.contains(key)) {
+                    requestData.put(key, entry.getValue());
+                }
+            }
+        } else {
+            // Фолбэк: исключаем query параметры из тела
+            Set<String> excludedKeys = new HashSet<>();
+            if (testData.getQueryParams() != null) {
+                excludedKeys.addAll(testData.getQueryParams().keySet());
+            }
+            // Исключаем path параметры из тела (если они присутствуют в пути)
+            if (mapping != null && mapping.getEndpointPath() != null) {
+                java.util.regex.Matcher m = java.util.regex.Pattern.compile("\\{([^}]+)\\}").matcher(mapping.getEndpointPath());
+                while (m.find()) {
+                    String pathKey = m.group(1);
+                    excludedKeys.add(pathKey);
+                }
+            }
+            
+            // Добавляем в requestData только те параметры, которые НЕ исключены
+            for (Map.Entry<String, Object> entry : testData.getRequestData().entrySet()) {
+                String key = entry.getKey();
+                if (!excludedKeys.contains(key)) {
+                    requestData.put(key, entry.getValue());
+                }
             }
         }
-        // Исключаем path параметры из тела (если они присутствуют в пути)
-        if (mapping.getEndpointPath() != null) {
-            java.util.regex.Matcher m = java.util.regex.Pattern.compile("\\{([^}]+)\\}").matcher(mapping.getEndpointPath());
-            while (m.find()) {
-                String pathKey = m.group(1);
-                requestData.remove(pathKey);
-            }
-        }
-        // Исключаем x-* поля из тела (они должны быть в заголовках)
+        
+        // Исключаем x-* поля из тела (они должны быть в заголовках, если не определены в OpenAPI)
         requestData.entrySet().removeIf(entry -> {
             String key = entry.getKey();
-            return key != null && key.toLowerCase().startsWith("x-");
+            if (key != null && key.toLowerCase().startsWith("x-")) {
+                // Если параметр не определен в OpenAPI как body, исключаем его
+                return !isBodyParameter(operation, key);
+            }
+            return false;
         });
         
         // Подстановка данных из контекста
@@ -578,62 +785,107 @@ public class TestExecutionService {
                 String contextKey = sourceStepId + "." + fieldName;
                 Object value = context.get(contextKey);
                 if (value != null) {
-                    requestData.put(fieldName, value);
+                    // Проверяем, что поле не является query/path/header параметром
+                    if (operation != null) {
+                        if (!isQueryParameter(operation, fieldName) && 
+                            !isPathParameter(operation, fieldName) && 
+                            !isHeaderParameter(operation, fieldName)) {
+                            requestData.put(fieldName, value);
+                        }
+                    } else {
+                        // Фолбэк: проверяем, что не query параметр
+                        if (testData.getQueryParams() == null || !testData.getQueryParams().containsKey(fieldName)) {
+                            requestData.put(fieldName, value);
+                        }
+                    }
                 }
             }
         }
         
         // Применяем пользовательские переопределения из маппинга
-        if (mapping.getCustomRequestData() != null) {
+        if (mapping != null && mapping.getCustomRequestData() != null) {
             for (Map.Entry<String, Object> e : mapping.getCustomRequestData().entrySet()) {
                 String key = e.getKey();
                 Object val = e.getValue();
-                // Если ключ является query параметром, не добавляем его в body
-                if (testData.getQueryParams() != null && testData.getQueryParams().containsKey(key)) {
-                    continue;
+                // Если ключ определен в OpenAPI как query/path/header, не добавляем его в body
+                if (operation != null) {
+                    if (isQueryParameter(operation, key) || isPathParameter(operation, key) || isHeaderParameter(operation, key)) {
+                        continue;
+                    }
+                } else {
+                    // Фолбэк: если ключ является query параметром, не добавляем его в body
+                    if (testData.getQueryParams() != null && testData.getQueryParams().containsKey(key)) {
+                        continue;
+                    }
+                    // Если ключ является path параметром, не добавляем его в body
+                    if (mapping.getEndpointPath() != null && mapping.getEndpointPath().contains("{" + key + "}")) {
+                        continue;
+                    }
                 }
-                // Если ключ является path параметром, не добавляем его в body
-                if (mapping.getEndpointPath() != null && mapping.getEndpointPath().contains("{" + key + "}")) {
-                    continue;
-                }
-                // Если ключ начинается с x-, не добавляем его в body (будет в заголовках)
+                // Если ключ начинается с x- и не определен в OpenAPI как body, не добавляем его в body
                 if (key != null && key.toLowerCase().startsWith("x-")) {
-                    continue;
+                    if (!isBodyParameter(operation, key)) {
+                        continue;
+                    }
                 }
                 requestData.put(key, val);
             }
         }
         
-        // Для GET/DELETE запросов body всегда должен быть null
-        String method = mapping.getEndpointMethod();
-        if (method != null && (method.equals("GET") || method.equals("DELETE"))) {
+        // Если requestBody не определен в OpenAPI, возвращаем null (даже если есть данные)
+        if (operation != null && operation.getRequestBody() == null) {
             return null;
         }
         
         // Для POST/PUT/PATCH запросов, если требуется body, но requestData пустое,
         // возвращаем пустой объект или структуру с data в зависимости от требований API
-        if (requestData.isEmpty() && (method.equals("POST") || method.equals("PUT") || method.equals("PATCH"))) {
-            // Проверяем, требуется ли структура с data (по пути эндпоинта)
-            String path = mapping.getEndpointPath();
-            if (path != null && (path.contains("/payments") || path.contains("/account-consents") || 
-                path.contains("/product-agreements"))) {
-                // Для этих эндпоинтов требуется структура с data
-                Map<String, Object> dataWrapper = new HashMap<>();
-                dataWrapper.put("data", new HashMap<>());
-                return dataWrapper;
-            }
-            // Иначе возвращаем пустой объект
-            return new HashMap<>();
-        }
-        
-        if (requestData.isEmpty()) {
-            // Для POST/PUT гарантируем наличие тела {}
-            if (mapping != null && ("POST".equalsIgnoreCase(mapping.getEndpointMethod()) || "PUT".equalsIgnoreCase(mapping.getEndpointMethod()))) {
-                return new java.util.HashMap<String, Object>();
+        if (requestData.isEmpty() && method != null && (method.equals("POST") || method.equals("PUT") || method.equals("PATCH"))) {
+            // Если requestBody определен в OpenAPI, возвращаем пустой объект
+            if (operation != null && operation.getRequestBody() != null) {
+                // Проверяем, требуется ли структура с data (по пути эндпоинта)
+                String path = mapping != null ? mapping.getEndpointPath() : null;
+                if (path != null && (path.contains("/payments") || path.contains("/account-consents") || 
+                    path.contains("/product-agreements"))) {
+                    // Для этих эндпоинтов требуется структура с data
+                    Map<String, Object> dataWrapper = new HashMap<>();
+                    dataWrapper.put("data", new HashMap<>());
+                    return dataWrapper;
+                }
+                // Иначе возвращаем пустой объект
+                return new HashMap<>();
             }
             return null;
         }
+        
+        if (requestData.isEmpty()) {
+            // Если requestBody определен в OpenAPI, возвращаем пустой объект
+            if (operation != null && operation.getRequestBody() != null && method != null && 
+                ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method) || "PATCH".equalsIgnoreCase(method))) {
+                return new HashMap<>();
+            }
+            return null;
+        }
+        
+        // Если requestBody не определен в OpenAPI, но есть данные, все равно возвращаем null
+        if (operation != null && operation.getRequestBody() == null) {
+            return null;
+        }
+        
         return requestData;
+    }
+    
+    /**
+     * Проверяет, является ли параметр частью body согласно OpenAPI
+     * Параметр считается body параметром, если он не определен как query/path/header
+     */
+    private boolean isBodyParameter(Operation operation, String paramName) {
+        if (operation == null) {
+            return true; // Если нет OpenAPI, считаем что может быть в body
+        }
+        // Если параметр определен как query/path/header, он не может быть в body
+        return !isQueryParameter(operation, paramName) && 
+               !isPathParameter(operation, paramName) && 
+               !isHeaderParameter(operation, paramName);
     }
     
     private void extractAndStoreData(TestExecutionStep step, String taskId, MappingResult mappingResult, Map<String, Object> context, ExecutionConfig config) {
@@ -815,4 +1067,6 @@ public class TestExecutionService {
         }
     }
 }
+
+
 

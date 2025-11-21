@@ -146,6 +146,7 @@ public class RunnerService {
             executionRequest.setMappingResult(mappingResult);
             executionRequest.setTestData(testData);
             executionRequest.setConfig(config);
+            executionRequest.setOpenApiModel(openApiModel);
             executionRequest.setTestDataVariantIndex(0);
             executionRequest.setStopOnFirstError(false); // MVP: всегда идем до конца
 

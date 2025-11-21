@@ -2,6 +2,11 @@ import type {
   MappingPayload,
   MappingResultDto,
   RunnerExecution,
+  TestDataGenerationRequest,
+  TestDataGenerationResult,
+  TestExecutionRequest,
+  TestExecutionResult,
+  GenerationType,
 } from "@/types/testflow";
 
 const DEFAULT_BASE_URL = "http://localhost:8080";
@@ -231,5 +236,107 @@ export async function createProject(
   }
 
   return (await response.json()) as ProjectDto;
+}
+
+// API функции для генерации тестовых данных
+export async function generateTestData(
+  request: TestDataGenerationRequest,
+): Promise<TestDataGenerationResult> {
+  const response = await fetch(`${getApiBaseUrl()}/api/generator/generate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(
+      `Test data generation failed (${response.status}): ${errorBody || response.statusText}`,
+    );
+  }
+
+  return (await response.json()) as TestDataGenerationResult;
+}
+
+export async function getGenerationTypes(): Promise<GenerationType[]> {
+  const response = await fetch(`${getApiBaseUrl()}/api/generator/types`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch generation types (${response.status})`);
+  }
+
+  return (await response.json()) as GenerationType[];
+}
+
+// API функции для выполнения тестов
+export async function executeTest(
+  request: TestExecutionRequest,
+): Promise<TestExecutionResult> {
+  const formData = new FormData();
+  formData.append("bpmnXml", request.bpmnXml);
+  if (request.openApiJson) {
+    formData.append("openApiJson", request.openApiJson);
+  }
+  formData.append("testDataJson", request.testDataJson);
+  formData.append("mappingResultJson", request.mappingResultJson);
+  formData.append("baseUrl", request.baseUrl);
+  formData.append("variantIndex", String(request.variantIndex ?? 0));
+  formData.append("stopOnFirstError", String(request.stopOnFirstError ?? false));
+
+  const response = await fetch(`${getApiBaseUrl()}/api/execution/execute-simple`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(
+      `Test execution failed (${response.status}): ${errorBody || response.statusText}`,
+    );
+  }
+
+  return (await response.json()) as TestExecutionResult;
+}
+
+export async function executeTestFull(
+  request: {
+    processModel: unknown;
+    mappingResult: unknown;
+    testData: TestDataGenerationResult;
+    config: unknown;
+    testDataVariantIndex?: number;
+    stopOnFirstError?: boolean;
+  },
+): Promise<TestExecutionResult> {
+  const response = await fetch(`${getApiBaseUrl()}/api/execution/execute`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(
+      `Test execution failed (${response.status}): ${errorBody || response.statusText}`,
+    );
+  }
+
+  return (await response.json()) as TestExecutionResult;
+}
+
+export async function getExecutionStatus(
+  executionId: string,
+): Promise<TestExecutionResult | null> {
+  const response = await fetch(`${getApiBaseUrl()}/api/execution/status/${executionId}`);
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch execution status (${response.status})`);
+  }
+
+  return (await response.json()) as TestExecutionResult;
 }
 

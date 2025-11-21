@@ -2,9 +2,12 @@ package ru.poib.VTBHack.parser.model.openapi;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Data
 public class OpenApiModel {
     @JsonProperty("openapi")
     private String openApiVersion;
@@ -14,33 +17,7 @@ public class OpenApiModel {
     
     @JsonProperty("paths")
     private Map<String, PathItem> paths;
-    
-    // Getters and Setters
-    public String getOpenApiVersion() {
-        return openApiVersion;
-    }
 
-    public void setOpenApiVersion(String openApiVersion) {
-        this.openApiVersion = openApiVersion;
-    }
-
-    public Info getInfo() {
-        return info;
-    }
-
-    public void setInfo(Info info) {
-        this.info = info;
-    }
-
-    public Map<String, PathItem> getPaths() {
-        return paths;
-    }
-
-    public void setPaths(Map<String, PathItem> paths) {
-        this.paths = paths;
-    }
-
-    // Inner classes
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Info {
         private String title;

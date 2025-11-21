@@ -18,9 +18,6 @@ import java.util.stream.Collectors;
 public class BpmnParserService {
     private final BpmnXMLConverter bpmnXMLConverter = new BpmnXMLConverter();
 
-    /**
-     * Парсит BPMN XML и возвращает модель процесса
-     */
     public ProcessModel parse(String bpmnXml) throws Exception {
         InputStream inputStream = new ByteArrayInputStream(bpmnXml.getBytes(StandardCharsets.UTF_8));
         BpmnModel bpmnModel = bpmnXMLConverter.convertToBpmnModel(
@@ -29,7 +26,6 @@ public class BpmnParserService {
                 false
         );
 
-        // Получаем главный процесс
         Process process = bpmnModel.getMainProcess();
         if (process == null) {
             throw new IllegalArgumentException("BPMN не содержит главного процесса");

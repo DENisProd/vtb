@@ -10,7 +10,7 @@ public class ProcessModel {
     private String id;
     private String name;
     private List<ProcessTask> tasks;
-    private Map<String, String> sequenceFlows; // sourceId -> targetId
+    private Map<String, String> sequenceFlows;
     private String startEventName;
     private String endEventName;
 }
