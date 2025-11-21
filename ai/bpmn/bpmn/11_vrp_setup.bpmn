@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_11"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="Process_11_vrp_setup" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_11" name="Клиент хочет настроить VRP">
+      <bpmn:outgoing>Flow_11_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_11_Auth" name="Аутентификация: POST /auth/bank-token">
+      <bpmn:incoming>Flow_11_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_11_2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_11_GetAccs" name="Получение списка счетов: GET /accounts">
+      <bpmn:incoming>Flow_11_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_11_3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_11_CreateConsent" name="Создание VRP согласия: POST /vrp-consents">
+      <bpmn:incoming>Flow_11_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_11_4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_11_InitPay" name="Инициация первого платежа: POST /domestic-vrp-payments">
+      <bpmn:incoming>Flow_11_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_11_5</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="EndEvent_11" name="VRP согласие создано, платёж инициирован">
+      <bpmn:incoming>Flow_11_5</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_11_1" sourceRef="StartEvent_11" targetRef="Task_11_Auth"/>
+    <bpmn:sequenceFlow id="Flow_11_2" sourceRef="Task_11_Auth" targetRef="Task_11_GetAccs"/>
+    <bpmn:sequenceFlow id="Flow_11_3" sourceRef="Task_11_GetAccs" targetRef="Task_11_CreateConsent"/>
+    <bpmn:sequenceFlow id="Flow_11_4" sourceRef="Task_11_CreateConsent" targetRef="Task_11_InitPay"/>
+    <bpmn:sequenceFlow id="Flow_11_5" sourceRef="Task_11_InitPay" targetRef="EndEvent_11"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_11">
+    <bpmndi:BPMNPlane id="BPMNPlane_11" bpmnElement="Process_11_vrp_setup">
+      <bpmndi:BPMNShape id="StartEvent_11_di" bpmnElement="StartEvent_11">
+        <dc:Bounds x="100" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_11_Auth_di" bpmnElement="Task_11_Auth">
+        <dc:Bounds x="200" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_11_GetAccs_di" bpmnElement="Task_11_GetAccs">
+        <dc:Bounds x="350" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_11_CreateConsent_di" bpmnElement="Task_11_CreateConsent">
+        <dc:Bounds x="500" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_11_InitPay_di" bpmnElement="Task_11_InitPay">
+        <dc:Bounds x="650" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_11_di" bpmnElement="EndEvent_11">
+        <dc:Bounds x="800" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_11_1_di" bpmnElement="Flow_11_1">
+        <di:waypoint x="136" y="218"/>
+        <di:waypoint x="200" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11_2_di" bpmnElement="Flow_11_2">
+        <di:waypoint x="300" y="218"/>
+        <di:waypoint x="350" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11_3_di" bpmnElement="Flow_11_3">
+        <di:waypoint x="450" y="218"/>
+        <di:waypoint x="500" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11_4_di" bpmnElement="Flow_11_4">
+        <di:waypoint x="600" y="218"/>
+        <di:waypoint x="650" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11_5_di" bpmnElement="Flow_11_5">
+        <di:waypoint x="750" y="218"/>
+        <di:waypoint x="800" y="218"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

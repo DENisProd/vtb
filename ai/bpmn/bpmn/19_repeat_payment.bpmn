@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_19"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="Process_19_repeat_payment" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_19" name="Клиент нажимает 'Повторить платёж'">
+      <bpmn:outgoing>Flow_19_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_19_Auth" name="Аутентификация: POST /auth/bank-token">
+      <bpmn:incoming>Flow_19_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_19_2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_19_GetTrans" name="Получение списка транзакций: GET /accounts/{account_id}/transactions">
+      <bpmn:incoming>Flow_19_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_19_3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_19_SelectLast" name="Выбор последней транзакции (платежа)">
+      <bpmn:incoming>Flow_19_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_19_4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_19_InitPay" name="Инициация нового платежа: POST /payments (с данными последнего)">
+      <bpmn:incoming>Flow_19_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_19_5</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="EndEvent_19" name="Повторный платёж выполнен">
+      <bpmn:incoming>Flow_19_5</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_19_1" sourceRef="StartEvent_19" targetRef="Task_19_Auth"/>
+    <bpmn:sequenceFlow id="Flow_19_2" sourceRef="Task_19_Auth" targetRef="Task_19_GetTrans"/>
+    <bpmn:sequenceFlow id="Flow_19_3" sourceRef="Task_19_GetTrans" targetRef="Task_19_SelectLast"/>
+    <bpmn:sequenceFlow id="Flow_19_4" sourceRef="Task_19_SelectLast" targetRef="Task_19_InitPay"/>
+    <bpmn:sequenceFlow id="Flow_19_5" sourceRef="Task_19_InitPay" targetRef="EndEvent_19"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_19">
+    <bpmndi:BPMNPlane id="BPMNPlane_19" bpmnElement="Process_19_repeat_payment">
+      <bpmndi:BPMNShape id="StartEvent_19_di" bpmnElement="StartEvent_19">
+        <dc:Bounds x="100" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_19_Auth_di" bpmnElement="Task_19_Auth">
+        <dc:Bounds x="200" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_19_GetTrans_di" bpmnElement="Task_19_GetTrans">
+        <dc:Bounds x="350" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_19_SelectLast_di" bpmnElement="Task_19_SelectLast">
+        <dc:Bounds x="500" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_19_InitPay_di" bpmnElement="Task_19_InitPay">
+        <dc:Bounds x="650" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_19_di" bpmnElement="EndEvent_19">
+        <dc:Bounds x="800" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_19_1_di" bpmnElement="Flow_19_1">
+        <di:waypoint x="136" y="218"/>
+        <di:waypoint x="200" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_19_2_di" bpmnElement="Flow_19_2">
+        <di:waypoint x="300" y="218"/>
+        <di:waypoint x="350" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_19_3_di" bpmnElement="Flow_19_3">
+        <di:waypoint x="450" y="218"/>
+        <di:waypoint x="500" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_19_4_di" bpmnElement="Flow_19_4">
+        <di:waypoint x="600" y="218"/>
+        <di:waypoint x="650" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_19_5_di" bpmnElement="Flow_19_5">
+        <di:waypoint x="750" y="218"/>
+        <di:waypoint x="800" y="218"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

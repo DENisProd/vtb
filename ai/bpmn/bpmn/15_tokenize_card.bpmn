@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_15"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="Process_15_tokenize_card" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_15" name="Клиент хочет добавить карту в Apple/Google Pay">
+      <bpmn:outgoing>Flow_15_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_15_Auth" name="Аутентификация: POST /auth/bank-token">
+      <bpmn:incoming>Flow_15_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_15_2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_15_GetAccs" name="Получение списка счетов: GET /accounts">
+      <bpmn:incoming>Flow_15_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_15_3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_15_SelectCard" name="Выбор счёта карты">
+      <bpmn:incoming>Flow_15_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_15_4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_15_InternalTokenize" name="Внутренний процесс токенизации (не в API)">
+      <bpmn:incoming>Flow_15_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_15_5</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="EndEvent_15" name="Токен добавлен в кошелёк">
+      <bpmn:incoming>Flow_15_5</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_15_1" sourceRef="StartEvent_15" targetRef="Task_15_Auth"/>
+    <bpmn:sequenceFlow id="Flow_15_2" sourceRef="Task_15_Auth" targetRef="Task_15_GetAccs"/>
+    <bpmn:sequenceFlow id="Flow_15_3" sourceRef="Task_15_GetAccs" targetRef="Task_15_SelectCard"/>
+    <bpmn:sequenceFlow id="Flow_15_4" sourceRef="Task_15_SelectCard" targetRef="Task_15_InternalTokenize"/>
+    <bpmn:sequenceFlow id="Flow_15_5" sourceRef="Task_15_InternalTokenize" targetRef="EndEvent_15"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_15">
+    <bpmndi:BPMNPlane id="BPMNPlane_15" bpmnElement="Process_15_tokenize_card">
+      <bpmndi:BPMNShape id="StartEvent_15_di" bpmnElement="StartEvent_15">
+        <dc:Bounds x="100" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_15_Auth_di" bpmnElement="Task_15_Auth">
+        <dc:Bounds x="200" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_15_GetAccs_di" bpmnElement="Task_15_GetAccs">
+        <dc:Bounds x="350" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_15_SelectCard_di" bpmnElement="Task_15_SelectCard">
+        <dc:Bounds x="500" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_15_InternalTokenize_di" bpmnElement="Task_15_InternalTokenize">
+        <dc:Bounds x="650" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_15_di" bpmnElement="EndEvent_15">
+        <dc:Bounds x="800" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_15_1_di" bpmnElement="Flow_15_1">
+        <di:waypoint x="136" y="218"/>
+        <di:waypoint x="200" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_15_2_di" bpmnElement="Flow_15_2">
+        <di:waypoint x="300" y="218"/>
+        <di:waypoint x="350" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_15_3_di" bpmnElement="Flow_15_3">
+        <di:waypoint x="450" y="218"/>
+        <di:waypoint x="500" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_15_4_di" bpmnElement="Flow_15_4">
+        <di:waypoint x="600" y="218"/>
+        <di:waypoint x="650" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_15_5_di" bpmnElement="Flow_15_5">
+        <di:waypoint x="750" y="218"/>
+        <di:waypoint x="800" y="218"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

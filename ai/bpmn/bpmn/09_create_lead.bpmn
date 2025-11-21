@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_09"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="Process_09_create_lead" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_09" name="Потенциальный B2B-клиент оставляет заявку">
+      <bpmn:outgoing>Flow_09_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_09_CreateLead" name="Создание лида: POST /customer-leads">
+      <bpmn:incoming>Flow_09_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_09_2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="EndEvent_09" name="Лид создан">
+      <bpmn:incoming>Flow_09_2</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_09_1" sourceRef="StartEvent_09" targetRef="Task_09_CreateLead"/>
+    <bpmn:sequenceFlow id="Flow_09_2" sourceRef="Task_09_CreateLead" targetRef="EndEvent_09"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_09">
+    <bpmndi:BPMNPlane id="BPMNPlane_09" bpmnElement="Process_09_create_lead">
+      <bpmndi:BPMNShape id="StartEvent_09_di" bpmnElement="StartEvent_09">
+        <dc:Bounds x="100" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_09_CreateLead_di" bpmnElement="Task_09_CreateLead">
+        <dc:Bounds x="200" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_09_di" bpmnElement="EndEvent_09">
+        <dc:Bounds x="350" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_09_1_di" bpmnElement="Flow_09_1">
+        <di:waypoint x="136" y="218"/>
+        <di:waypoint x="200" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_09_2_di" bpmnElement="Flow_09_2">
+        <di:waypoint x="300" y="218"/>
+        <di:waypoint x="350" y="218"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

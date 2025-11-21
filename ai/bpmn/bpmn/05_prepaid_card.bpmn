@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_05"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="Process_05_prepaid_card" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_05" name="Клиент оформляет карту через партнёра">
+      <bpmn:outgoing>Flow_05_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_05_CreateLead" name="Создание лида: POST /customer-leads">
+      <bpmn:incoming>Flow_05_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_05_2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_05_Auth" name="Аутентификация: POST /auth/bank-token">
+      <bpmn:incoming>Flow_05_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_05_3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_05_GetProd" name="Получение списка продуктов: GET /products">
+      <bpmn:incoming>Flow_05_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_05_4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_05_GetProdDet" name="Выбор продукта: GET /products/{product_id}">
+      <bpmn:incoming>Flow_05_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_05_5</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_05_Apply" name="Подача заявки: POST /product-application">
+      <bpmn:incoming>Flow_05_5</bpmn:incoming>
+      <bpmn:outgoing>Flow_05_6</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_05_CreateAgree" name="Создание договора: POST /product-agreements">
+      <bpmn:incoming>Flow_05_6</bpmn:incoming>
+      <bpmn:outgoing>Flow_05_7</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="EndEvent_05" name="Карта открыта">
+      <bpmn:incoming>Flow_05_7</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_05_1" sourceRef="StartEvent_05" targetRef="Task_05_CreateLead"/>
+    <bpmn:sequenceFlow id="Flow_05_2" sourceRef="Task_05_CreateLead" targetRef="Task_05_Auth"/>
+    <bpmn:sequenceFlow id="Flow_05_3" sourceRef="Task_05_Auth" targetRef="Task_05_GetProd"/>
+    <bpmn:sequenceFlow id="Flow_05_4" sourceRef="Task_05_GetProd" targetRef="Task_05_GetProdDet"/>
+    <bpmn:sequenceFlow id="Flow_05_5" sourceRef="Task_05_GetProdDet" targetRef="Task_05_Apply"/>
+    <bpmn:sequenceFlow id="Flow_05_6" sourceRef="Task_05_Apply" targetRef="Task_05_CreateAgree"/>
+    <bpmn:sequenceFlow id="Flow_05_7" sourceRef="Task_05_CreateAgree" targetRef="EndEvent_05"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_05">
+    <bpmndi:BPMNPlane id="BPMNPlane_05" bpmnElement="Process_05_prepaid_card">
+      <bpmndi:BPMNShape id="StartEvent_05_di" bpmnElement="StartEvent_05">
+        <dc:Bounds x="100" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_05_CreateLead_di" bpmnElement="Task_05_CreateLead">
+        <dc:Bounds x="200" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_05_Auth_di" bpmnElement="Task_05_Auth">
+        <dc:Bounds x="350" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_05_GetProd_di" bpmnElement="Task_05_GetProd">
+        <dc:Bounds x="500" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_05_GetProdDet_di" bpmnElement="Task_05_GetProdDet">
+        <dc:Bounds x="650" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_05_Apply_di" bpmnElement="Task_05_Apply">
+        <dc:Bounds x="800" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_05_CreateAgree_di" bpmnElement="Task_05_CreateAgree">
+        <dc:Bounds x="950" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_05_di" bpmnElement="EndEvent_05">
+        <dc:Bounds x="1100" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_05_1_di" bpmnElement="Flow_05_1">
+        <di:waypoint x="136" y="218"/>
+        <di:waypoint x="200" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_05_2_di" bpmnElement="Flow_05_2">
+        <di:waypoint x="300" y="218"/>
+        <di:waypoint x="350" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_05_3_di" bpmnElement="Flow_05_3">
+        <di:waypoint x="450" y="218"/>
+        <di:waypoint x="500" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_05_4_di" bpmnElement="Flow_05_4">
+        <di:waypoint x="600" y="218"/>
+        <di:waypoint x="650" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_05_5_di" bpmnElement="Flow_05_5">
+        <di:waypoint x="750" y="218"/>
+        <di:waypoint x="800" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_05_6_di" bpmnElement="Flow_05_6">
+        <di:waypoint x="900" y="218"/>
+        <di:waypoint x="950" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_05_7_di" bpmnElement="Flow_05_7">
+        <di:waypoint x="1050" y="218"/>
+        <di:waypoint x="1100" y="218"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

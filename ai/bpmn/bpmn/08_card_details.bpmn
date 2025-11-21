@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_08"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="Process_08_card_details" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_08" name="Клиент хочет получить реквизиты карты">
+      <bpmn:outgoing>Flow_08_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_08_Auth" name="Аутентификация: POST /auth/bank-token">
+      <bpmn:incoming>Flow_08_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_08_2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_08_GetAccs" name="Получение списка счетов: GET /accounts">
+      <bpmn:incoming>Flow_08_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_08_3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_08_GetDet" name="Получение деталей счёта: GET /accounts/{account_id}">
+      <bpmn:incoming>Flow_08_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_08_4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="EndEvent_08" name="Реквизиты счёта отображены">
+      <bpmn:incoming>Flow_08_4</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_08_1" sourceRef="StartEvent_08" targetRef="Task_08_Auth"/>
+    <bpmn:sequenceFlow id="Flow_08_2" sourceRef="Task_08_Auth" targetRef="Task_08_GetAccs"/>
+    <bpmn:sequenceFlow id="Flow_08_3" sourceRef="Task_08_GetAccs" targetRef="Task_08_GetDet"/>
+    <bpmn:sequenceFlow id="Flow_08_4" sourceRef="Task_08_GetDet" targetRef="EndEvent_08"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_08">
+    <bpmndi:BPMNPlane id="BPMNPlane_08" bpmnElement="Process_08_card_details">
+      <bpmndi:BPMNShape id="StartEvent_08_di" bpmnElement="StartEvent_08">
+        <dc:Bounds x="100" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_08_Auth_di" bpmnElement="Task_08_Auth">
+        <dc:Bounds x="200" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_08_GetAccs_di" bpmnElement="Task_08_GetAccs">
+        <dc:Bounds x="350" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_08_GetDet_di" bpmnElement="Task_08_GetDet">
+        <dc:Bounds x="500" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_08_di" bpmnElement="EndEvent_08">
+        <dc:Bounds x="650" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_08_1_di" bpmnElement="Flow_08_1">
+        <di:waypoint x="136" y="218"/>
+        <di:waypoint x="200" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_08_2_di" bpmnElement="Flow_08_2">
+        <di:waypoint x="300" y="218"/>
+        <di:waypoint x="350" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_08_3_di" bpmnElement="Flow_08_3">
+        <di:waypoint x="450" y="218"/>
+        <di:waypoint x="500" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_08_4_di" bpmnElement="Flow_08_4">
+        <di:waypoint x="600" y="218"/>
+        <di:waypoint x="650" y="218"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

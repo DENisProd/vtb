@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_02"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="Process_02_credit_application" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_02" name="Клиент заполняет анкету на сайте партнёра">
+      <bpmn:outgoing>Flow_02_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_02_CreateLead" name="Создание лида: POST /customer-leads">
+      <bpmn:incoming>Flow_02_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_02_2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_02_Auth" name="Аутентификация: POST /auth/bank-token">
+      <bpmn:incoming>Flow_02_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_02_3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_02_GetProd" name="Получение списка продуктов: GET /products">
+      <bpmn:incoming>Flow_02_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_02_4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_02_Apply" name="Подача заявки: POST /product-application">
+      <bpmn:incoming>Flow_02_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_02_5</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_02_CheckApp" name="Проверка статуса заявки: GET /product-application/{application_id}">
+      <bpmn:incoming>Flow_02_5</bpmn:incoming>
+      <bpmn:outgoing>Flow_02_6</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="EndEvent_02" name="Заявка подана">
+      <bpmn:incoming>Flow_02_6</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_02_1" sourceRef="StartEvent_02" targetRef="Task_02_CreateLead"/>
+    <bpmn:sequenceFlow id="Flow_02_2" sourceRef="Task_02_CreateLead" targetRef="Task_02_Auth"/>
+    <bpmn:sequenceFlow id="Flow_02_3" sourceRef="Task_02_Auth" targetRef="Task_02_GetProd"/>
+    <bpmn:sequenceFlow id="Flow_02_4" sourceRef="Task_02_GetProd" targetRef="Task_02_Apply"/>
+    <bpmn:sequenceFlow id="Flow_02_5" sourceRef="Task_02_Apply" targetRef="Task_02_CheckApp"/>
+    <bpmn:sequenceFlow id="Flow_02_6" sourceRef="Task_02_CheckApp" targetRef="EndEvent_02"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_02">
+    <bpmndi:BPMNPlane id="BPMNPlane_02" bpmnElement="Process_02_credit_application">
+      <bpmndi:BPMNShape id="StartEvent_02_di" bpmnElement="StartEvent_02">
+        <dc:Bounds x="100" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_02_CreateLead_di" bpmnElement="Task_02_CreateLead">
+        <dc:Bounds x="200" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_02_Auth_di" bpmnElement="Task_02_Auth">
+        <dc:Bounds x="350" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_02_GetProd_di" bpmnElement="Task_02_GetProd">
+        <dc:Bounds x="500" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_02_Apply_di" bpmnElement="Task_02_Apply">
+        <dc:Bounds x="650" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_02_CheckApp_di" bpmnElement="Task_02_CheckApp">
+        <dc:Bounds x="800" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_02_di" bpmnElement="EndEvent_02">
+        <dc:Bounds x="950" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_02_1_di" bpmnElement="Flow_02_1">
+        <di:waypoint x="136" y="218"/>
+        <di:waypoint x="200" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02_2_di" bpmnElement="Flow_02_2">
+        <di:waypoint x="300" y="218"/>
+        <di:waypoint x="350" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02_3_di" bpmnElement="Flow_02_3">
+        <di:waypoint x="450" y="218"/>
+        <di:waypoint x="500" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02_4_di" bpmnElement="Flow_02_4">
+        <di:waypoint x="600" y="218"/>
+        <di:waypoint x="650" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02_5_di" bpmnElement="Flow_02_5">
+        <di:waypoint x="750" y="218"/>
+        <di:waypoint x="800" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02_6_di" bpmnElement="Flow_02_6">
+        <di:waypoint x="900" y="218"/>
+        <di:waypoint x="950" y="218"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_18"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="Process_18_utility_payment" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_18" name="Клиент вводит реквизиты ЖКХ">
+      <bpmn:outgoing>Flow_18_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_18_Auth" name="Аутентификация: POST /auth/bank-token">
+      <bpmn:incoming>Flow_18_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_18_2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_18_ExtIdentify" name="Внешний вызов: Идентификация получателя">
+      <bpmn:incoming>Flow_18_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_18_3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_18_GetDetails" name="Получение точных реквизитов получателя">
+      <bpmn:incoming>Flow_18_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_18_4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_18_GetAccs" name="Получение списка счетов: GET /accounts">
+      <bpmn:incoming>Flow_18_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_18_5</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_18_InitPay" name="Инициация платежа: POST /payments (ЖКХ)">
+      <bpmn:incoming>Flow_18_5</bpmn:incoming>
+      <bpmn:outgoing>Flow_18_6</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="EndEvent_18" name="Платёж за ЖКХ выполнен">
+      <bpmn:incoming>Flow_18_6</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_18_1" sourceRef="StartEvent_18" targetRef="Task_18_Auth"/>
+    <bpmn:sequenceFlow id="Flow_18_2" sourceRef="Task_18_Auth" targetRef="Task_18_ExtIdentify"/>
+    <bpmn:sequenceFlow id="Flow_18_3" sourceRef="Task_18_ExtIdentify" targetRef="Task_18_GetDetails"/>
+    <bpmn:sequenceFlow id="Flow_18_4" sourceRef="Task_18_GetDetails" targetRef="Task_18_GetAccs"/>
+    <bpmn:sequenceFlow id="Flow_18_5" sourceRef="Task_18_GetAccs" targetRef="Task_18_InitPay"/>
+    <bpmn:sequenceFlow id="Flow_18_6" sourceRef="Task_18_InitPay" targetRef="EndEvent_18"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_18">
+    <bpmndi:BPMNPlane id="BPMNPlane_18" bpmnElement="Process_18_utility_payment">
+      <bpmndi:BPMNShape id="StartEvent_18_di" bpmnElement="StartEvent_18">
+        <dc:Bounds x="100" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_18_Auth_di" bpmnElement="Task_18_Auth">
+        <dc:Bounds x="200" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_18_ExtIdentify_di" bpmnElement="Task_18_ExtIdentify">
+        <dc:Bounds x="350" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_18_GetDetails_di" bpmnElement="Task_18_GetDetails">
+        <dc:Bounds x="500" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_18_GetAccs_di" bpmnElement="Task_18_GetAccs">
+        <dc:Bounds x="650" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_18_InitPay_di" bpmnElement="Task_18_InitPay">
+        <dc:Bounds x="800" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_18_di" bpmnElement="EndEvent_18">
+        <dc:Bounds x="950" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_18_1_di" bpmnElement="Flow_18_1">
+        <di:waypoint x="136" y="218"/>
+        <di:waypoint x="200" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18_2_di" bpmnElement="Flow_18_2">
+        <di:waypoint x="300" y="218"/>
+        <di:waypoint x="350" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18_3_di" bpmnElement="Flow_18_3">
+        <di:waypoint x="450" y="218"/>
+        <di:waypoint x="500" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18_4_di" bpmnElement="Flow_18_4">
+        <di:waypoint x="600" y="218"/>
+        <di:waypoint x="650" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18_5_di" bpmnElement="Flow_18_5">
+        <di:waypoint x="750" y="218"/>
+        <di:waypoint x="800" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18_6_di" bpmnElement="Flow_18_6">
+        <di:waypoint x="900" y="218"/>
+        <di:waypoint x="950" y="218"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

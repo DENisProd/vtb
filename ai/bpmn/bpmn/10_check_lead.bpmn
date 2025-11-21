@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_10"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="Process_10_check_lead" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_10" name="Клиент указывает ИНН">
+      <bpmn:outgoing>Flow_10_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_10_ExtCheck" name="Внешний вызов: Проверка ИНН">
+      <bpmn:incoming>Flow_10_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_10_2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_10_Decision" name="Принятие решения">
+      <bpmn:incoming>Flow_10_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_10_3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gateway_10_Result" name="Результат проверки?">
+      <bpmn:incoming>Flow_10_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_10_4</bpmn:outgoing>
+      <bpmn:outgoing>Flow_10_5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="Task_10_Continue" name="Продолжить оформление">
+      <bpmn:incoming>Flow_10_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_10_6</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_10_Decline" name="Отказать в оформлении">
+      <bpmn:incoming>Flow_10_5</bpmn:incoming>
+      <bpmn:outgoing>Flow_10_7</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="EndEvent_10a" name="Оформление продолжается">
+      <bpmn:incoming>Flow_10_6</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent_10b" name="Оформление отклонено">
+      <bpmn:incoming>Flow_10_7</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_10_1" sourceRef="StartEvent_10" targetRef="Task_10_ExtCheck"/>
+    <bpmn:sequenceFlow id="Flow_10_2" sourceRef="Task_10_ExtCheck" targetRef="Task_10_Decision"/>
+    <bpmn:sequenceFlow id="Flow_10_3" sourceRef="Task_10_Decision" targetRef="Gateway_10_Result"/>
+    <bpmn:sequenceFlow id="Flow_10_4" sourceRef="Gateway_10_Result" targetRef="Task_10_Continue" name="OK"/>
+    <bpmn:sequenceFlow id="Flow_10_5" sourceRef="Gateway_10_Result" targetRef="Task_10_Decline" name="Failed"/>
+    <bpmn:sequenceFlow id="Flow_10_6" sourceRef="Task_10_Continue" targetRef="EndEvent_10a"/>
+    <bpmn:sequenceFlow id="Flow_10_7" sourceRef="Task_10_Decline" targetRef="EndEvent_10b"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_10">
+    <bpmndi:BPMNPlane id="BPMNPlane_10" bpmnElement="Process_10_check_lead">
+      <bpmndi:BPMNShape id="StartEvent_10_di" bpmnElement="StartEvent_10">
+        <dc:Bounds x="100" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_10_ExtCheck_di" bpmnElement="Task_10_ExtCheck">
+        <dc:Bounds x="200" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_10_Decision_di" bpmnElement="Task_10_Decision">
+        <dc:Bounds x="350" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_10_Result_di" bpmnElement="Gateway_10_Result">
+        <dc:Bounds x="500" y="196" width="48" height="48"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_10_Continue_di" bpmnElement="Task_10_Continue">
+        <dc:Bounds x="600" y="150" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_10_Decline_di" bpmnElement="Task_10_Decline">
+        <dc:Bounds x="600" y="270" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_10a_di" bpmnElement="EndEvent_10a">
+        <dc:Bounds x="750" y="162" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_10b_di" bpmnElement="EndEvent_10b">
+        <dc:Bounds x="750" y="282" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_10_1_di" bpmnElement="Flow_10_1">
+        <di:waypoint x="136" y="218"/>
+        <di:waypoint x="200" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10_2_di" bpmnElement="Flow_10_2">
+        <di:waypoint x="300" y="218"/>
+        <di:waypoint x="350" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10_3_di" bpmnElement="Flow_10_3">
+        <di:waypoint x="450" y="218"/>
+        <di:waypoint x="500" y="220"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10_4_di" bpmnElement="Flow_10_4">
+        <di:waypoint x="548" y="208"/>
+        <di:waypoint x="600" y="208"/>
+        <di:waypoint x="600" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10_5_di" bpmnElement="Flow_10_5">
+        <di:waypoint x="548" y="228"/>
+        <di:waypoint x="600" y="228"/>
+        <di:waypoint x="600" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10_6_di" bpmnElement="Flow_10_6">
+        <di:waypoint x="700" y="180"/>
+        <di:waypoint x="750" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10_7_di" bpmnElement="Flow_10_7">
+        <di:waypoint x="700" y="300"/>
+        <di:waypoint x="750" y="300"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_20"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="Process_20_get_cvv" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_20" name="Клиент хочет получить CVV виртуальной карты">
+      <bpmn:outgoing>Flow_20_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_20_Auth" name="Аутентификация: POST /auth/bank-token">
+      <bpmn:incoming>Flow_20_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_20_2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_20_GetAccs" name="Получение списка счетов: GET /accounts">
+      <bpmn:incoming>Flow_20_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_20_3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_20_SelectCard" name="Выбор счёта виртуальной карты">
+      <bpmn:incoming>Flow_20_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_20_4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_20_InternalGet" name="Внутренний процесс получения CVV (не в API)">
+      <bpmn:incoming>Flow_20_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_20_5</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="EndEvent_20" name="CVV предоставлен безопасно">
+      <bpmn:incoming>Flow_20_5</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_20_1" sourceRef="StartEvent_20" targetRef="Task_20_Auth"/>
+    <bpmn:sequenceFlow id="Flow_20_2" sourceRef="Task_20_Auth" targetRef="Task_20_GetAccs"/>
+    <bpmn:sequenceFlow id="Flow_20_3" sourceRef="Task_20_GetAccs" targetRef="Task_20_SelectCard"/>
+    <bpmn:sequenceFlow id="Flow_20_4" sourceRef="Task_20_SelectCard" targetRef="Task_20_InternalGet"/>
+    <bpmn:sequenceFlow id="Flow_20_5" sourceRef="Task_20_InternalGet" targetRef="EndEvent_20"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_20">
+    <bpmndi:BPMNPlane id="BPMNPlane_20" bpmnElement="Process_20_get_cvv">
+      <bpmndi:BPMNShape id="StartEvent_20_di" bpmnElement="StartEvent_20">
+        <dc:Bounds x="100" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_20_Auth_di" bpmnElement="Task_20_Auth">
+        <dc:Bounds x="200" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_20_GetAccs_di" bpmnElement="Task_20_GetAccs">
+        <dc:Bounds x="350" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_20_SelectCard_di" bpmnElement="Task_20_SelectCard">
+        <dc:Bounds x="500" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_20_InternalGet_di" bpmnElement="Task_20_InternalGet">
+        <dc:Bounds x="650" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_20_di" bpmnElement="EndEvent_20">
+        <dc:Bounds x="800" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_20_1_di" bpmnElement="Flow_20_1">
+        <di:waypoint x="136" y="218"/>
+        <di:waypoint x="200" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_20_2_di" bpmnElement="Flow_20_2">
+        <di:waypoint x="300" y="218"/>
+        <di:waypoint x="350" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_20_3_di" bpmnElement="Flow_20_3">
+        <di:waypoint x="450" y="218"/>
+        <di:waypoint x="500" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_20_4_di" bpmnElement="Flow_20_4">
+        <di:waypoint x="600" y="218"/>
+        <di:waypoint x="650" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_20_5_di" bpmnElement="Flow_20_5">
+        <di:waypoint x="750" y="218"/>
+        <di:waypoint x="800" y="218"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

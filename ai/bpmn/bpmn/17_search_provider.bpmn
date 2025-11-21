@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_17"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="Process_17_search_provider" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_17" name="Клиент вводит ИНН поставщика">
+      <bpmn:outgoing>Flow_17_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_17_ExtSearch" name="Внешний вызов: Поиск поставщика по ИНН">
+      <bpmn:incoming>Flow_17_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_17_2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_17_GetDetails" name="Получение реквизитов поставщика">
+      <bpmn:incoming>Flow_17_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_17_3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="EndEvent_17" name="Реквизиты получены">
+      <bpmn:incoming>Flow_17_3</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_17_1" sourceRef="StartEvent_17" targetRef="Task_17_ExtSearch"/>
+    <bpmn:sequenceFlow id="Flow_17_2" sourceRef="Task_17_ExtSearch" targetRef="Task_17_GetDetails"/>
+    <bpmn:sequenceFlow id="Flow_17_3" sourceRef="Task_17_GetDetails" targetRef="EndEvent_17"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_17">
+    <bpmndi:BPMNPlane id="BPMNPlane_17" bpmnElement="Process_17_search_provider">
+      <bpmndi:BPMNShape id="StartEvent_17_di" bpmnElement="StartEvent_17">
+        <dc:Bounds x="100" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_17_ExtSearch_di" bpmnElement="Task_17_ExtSearch">
+        <dc:Bounds x="200" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_17_GetDetails_di" bpmnElement="Task_17_GetDetails">
+        <dc:Bounds x="350" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_17_di" bpmnElement="EndEvent_17">
+        <dc:Bounds x="500" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_17_1_di" bpmnElement="Flow_17_1">
+        <di:waypoint x="136" y="218"/>
+        <di:waypoint x="200" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_17_2_di" bpmnElement="Flow_17_2">
+        <di:waypoint x="300" y="218"/>
+        <di:waypoint x="350" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_17_3_di" bpmnElement="Flow_17_3">
+        <di:waypoint x="450" y="218"/>
+        <di:waypoint x="500" y="218"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

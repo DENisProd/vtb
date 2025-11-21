@@ -1,0 +1,83 @@
+{
+  "scenario": "VTB Orchestra Process",
+  "steps": [
+    {
+      "taskId": "StartEvent_01",
+      "taskName": "Клиент выбирает услугу и решает оплатить бонусами",
+      "ok": false,
+      "status_code": 403,
+      "response": {
+        "detail": "Not authenticated"
+      },
+      "expected_status": 200
+    },
+    {
+      "taskId": "Task_01_Auth",
+      "taskName": "Аутентификация: POST /auth/bank-token",
+      "ok": true,
+      "status_code": 200,
+      "response": {
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZWFtMTM3IiwiY2xpZW50X2lkIjoidGVhbTEzNyIsInR5cGUiOiJ0ZWFtIiwiaXNzIjoiYWJhbmsiLCJhdWQiOiJvcGVuYmFua2luZyIsImV4cCI6MTc2Mjc5NjA0OX0.j4n8i8oHxXSvI5olXvdXP5-unke7o5ZgswJf1ZMd_o8",
+        "token_type": "bearer",
+        "client_id": "team137",
+        "algorithm": "HS256",
+        "expires_in": 86400
+      },
+      "expected_status": 200
+    },
+    {
+      "taskId": "Task_01_GetAccs",
+      "taskName": "Получение списка счетов: GET /accounts",
+      "ok": false,
+      "status_code": 401,
+      "response": {
+        "detail": "Client token required for own account access"
+      },
+      "expected_status": 200
+    },
+    {
+      "taskId": "Task_01_GetBal",
+      "taskName": "Проверка баланса бонусного счёта: GET /accounts/{account_id}/balances",
+      "ok": false,
+      "status_code": 401,
+      "response": {
+        "detail": "Client token required for own account access"
+      },
+      "expected_status": 200
+    },
+    {
+      "taskId": "Task_01_InitPay",
+      "taskName": "Инициация платежа: POST /payments",
+      "ok": true,
+      "status_code": 200,
+      "response": {
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZWFtMTM3IiwiY2xpZW50X2lkIjoidGVhbTEzNyIsInR5cGUiOiJ0ZWFtIiwiaXNzIjoiYWJhbmsiLCJhdWQiOiJvcGVuYmFua2luZyIsImV4cCI6MTc2Mjc5NjA1MH0.giTR27l0E6utohAluMZ2kknY8fURHc3GRaDcoN7tiVA",
+        "token_type": "bearer",
+        "client_id": "team137",
+        "algorithm": "HS256",
+        "expires_in": 86400
+      },
+      "expected_status": 200
+    },
+    {
+      "taskId": "Task_01_CheckPay",
+      "taskName": "Проверка статуса платежа: GET /payments/{payment_id}",
+      "ok": false,
+      "status_code": 401,
+      "response": {
+        "detail": "Client token required for own account access"
+      },
+      "expected_status": 200
+    },
+    {
+      "taskId": "EndEvent_01",
+      "taskName": "Платёж успешно завершён",
+      "ok": false,
+      "error": "no endpoint"
+    }
+  ],
+  "context": {
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZWFtMTM3IiwiY2xpZW50X2lkIjoidGVhbTEzNyIsInR5cGUiOiJ0ZWFtIiwiaXNzIjoiYWJhbmsiLCJhdWQiOiJvcGVuYmFua2luZyIsImV4cCI6MTc2Mjc5NjA1MH0.giTR27l0E6utohAluMZ2kknY8fURHc3GRaDcoN7tiVA",
+    "client_id": "team137"
+  }
+}

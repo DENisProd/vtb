@@ -1,0 +1,6 @@
+{
+  "max_new_tokens": 1024,
+  "num_beams": 2,
+  "temperature": 0.8,
+  "do_sample": true
+}

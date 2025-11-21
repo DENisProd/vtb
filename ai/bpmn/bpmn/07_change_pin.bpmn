@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_07"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="Process_07_change_pin" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_07" name="Клиент запрашивает смену PIN-кода">
+      <bpmn:outgoing>Flow_07_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_07_Auth" name="Аутентификация: POST /auth/bank-token">
+      <bpmn:incoming>Flow_07_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_07_2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_07_GetAccs" name="Получение списка счетов: GET /accounts">
+      <bpmn:incoming>Flow_07_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_07_3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_07_SelectCard" name="Выбор счёта карты">
+      <bpmn:incoming>Flow_07_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_07_4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_07_InternalChange" name="Внутренний процесс смены PIN (не в API)">
+      <bpmn:incoming>Flow_07_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_07_5</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="EndEvent_07" name="Запрос на смену PIN инициирован">
+      <bpmn:incoming>Flow_07_5</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_07_1" sourceRef="StartEvent_07" targetRef="Task_07_Auth"/>
+    <bpmn:sequenceFlow id="Flow_07_2" sourceRef="Task_07_Auth" targetRef="Task_07_GetAccs"/>
+    <bpmn:sequenceFlow id="Flow_07_3" sourceRef="Task_07_GetAccs" targetRef="Task_07_SelectCard"/>
+    <bpmn:sequenceFlow id="Flow_07_4" sourceRef="Task_07_SelectCard" targetRef="Task_07_InternalChange"/>
+    <bpmn:sequenceFlow id="Flow_07_5" sourceRef="Task_07_InternalChange" targetRef="EndEvent_07"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_07">
+    <bpmndi:BPMNPlane id="BPMNPlane_07" bpmnElement="Process_07_change_pin">
+      <bpmndi:BPMNShape id="StartEvent_07_di" bpmnElement="StartEvent_07">
+        <dc:Bounds x="100" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_07_Auth_di" bpmnElement="Task_07_Auth">
+        <dc:Bounds x="200" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_07_GetAccs_di" bpmnElement="Task_07_GetAccs">
+        <dc:Bounds x="350" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_07_SelectCard_di" bpmnElement="Task_07_SelectCard">
+        <dc:Bounds x="500" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_07_InternalChange_di" bpmnElement="Task_07_InternalChange">
+        <dc:Bounds x="650" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_07_di" bpmnElement="EndEvent_07">
+        <dc:Bounds x="800" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_07_1_di" bpmnElement="Flow_07_1">
+        <di:waypoint x="136" y="218"/>
+        <di:waypoint x="200" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_07_2_di" bpmnElement="Flow_07_2">
+        <di:waypoint x="300" y="218"/>
+        <di:waypoint x="350" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_07_3_di" bpmnElement="Flow_07_3">
+        <di:waypoint x="450" y="218"/>
+        <di:waypoint x="500" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_07_4_di" bpmnElement="Flow_07_4">
+        <di:waypoint x="600" y="218"/>
+        <di:waypoint x="650" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_07_5_di" bpmnElement="Flow_07_5">
+        <di:waypoint x="750" y="218"/>
+        <di:waypoint x="800" y="218"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

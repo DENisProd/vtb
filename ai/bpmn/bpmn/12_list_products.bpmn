@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_12"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="Process_12_list_products" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_12" name="Клиент заходит в раздел продуктов">
+      <bpmn:outgoing>Flow_12_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_12_GetProd" name="Получение списка продуктов: GET /products">
+      <bpmn:incoming>Flow_12_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_12_2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="EndEvent_12" name="Список продуктов отображён">
+      <bpmn:incoming>Flow_12_2</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_12_1" sourceRef="StartEvent_12" targetRef="Task_12_GetProd"/>
+    <bpmn:sequenceFlow id="Flow_12_2" sourceRef="Task_12_GetProd" targetRef="EndEvent_12"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_12">
+    <bpmndi:BPMNPlane id="BPMNPlane_12" bpmnElement="Process_12_list_products">
+      <bpmndi:BPMNShape id="StartEvent_12_di" bpmnElement="StartEvent_12">
+        <dc:Bounds x="100" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_12_GetProd_di" bpmnElement="Task_12_GetProd">
+        <dc:Bounds x="200" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_12_di" bpmnElement="EndEvent_12">
+        <dc:Bounds x="350" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_12_1_di" bpmnElement="Flow_12_1">
+        <di:waypoint x="136" y="218"/>
+        <di:waypoint x="200" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_12_2_di" bpmnElement="Flow_12_2">
+        <di:waypoint x="300" y="218"/>
+        <di:waypoint x="350" y="218"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

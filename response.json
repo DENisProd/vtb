@@ -1,0 +1,366 @@
+{
+    "taskMappings": {
+        "Task_01_Auth": {
+            "taskId": "Task_01_Auth",
+            "taskName": "Аутентификация: POST /auth/bank-token",
+            "endpointPath": "/auth/bank-token",
+            "endpointMethod": "POST",
+            "operationId": "create_bank_token_auth_bank_token_post",
+            "confidenceScore": 0.95,
+            "matchingStrategy": "EXACT",
+            "recommendation": "Высокая уверенность в сопоставлении",
+            "customRequestData": null
+        },
+        "Task_01_GetAccs": {
+            "taskId": "Task_01_GetAccs",
+            "taskName": "Получение списка счетов: GET /accounts",
+            "endpointPath": "/accounts",
+            "endpointMethod": "GET",
+            "operationId": "get_accounts_accounts_get",
+            "confidenceScore": 0.95,
+            "matchingStrategy": "EXACT",
+            "recommendation": "Высокая уверенность в сопоставлении",
+            "customRequestData": null
+        },
+        "Task_01_GetBal": {
+            "taskId": "Task_01_GetBal",
+            "taskName": "Проверка баланса бонусного счёта: GET /accounts/{account_id}/balances",
+            "endpointPath": "/accounts/{account_id}/balances",
+            "endpointMethod": "GET",
+            "operationId": "get_balances_accounts__account_id__balances_get",
+            "confidenceScore": 0.95,
+            "matchingStrategy": "EXACT",
+            "recommendation": "Высокая уверенность в сопоставлении",
+            "customRequestData": null
+        },
+        "Task_01_CheckPay": {
+            "taskId": "Task_01_CheckPay",
+            "taskName": "Проверка статуса платежа: GET /payments/{payment_id}",
+            "endpointPath": "/payments/{payment_id}",
+            "endpointMethod": "GET",
+            "operationId": "get_payment_payments__payment_id__get",
+            "confidenceScore": 0.95,
+            "matchingStrategy": "EXACT",
+            "recommendation": "Высокая уверенность в сопоставлении",
+            "customRequestData": null
+        },
+        "VIRTUAL_DEP_1": {
+            "taskId": "VIRTUAL_DEP_1",
+            "taskName": "1. Создать согласие",
+            "endpointPath": "/account-consents/request",
+            "endpointMethod": "POST",
+            "operationId": "request_consent_account_consents_request_post",
+            "confidenceScore": 1.0,
+            "matchingStrategy": "DEPENDENCY_AUTO",
+            "recommendation": "Автоматически добавлено как зависимость для другого эндпоинта",
+            "customRequestData": null
+        },
+        "Task_01_InitPay": {
+            "taskId": "Task_01_InitPay",
+            "taskName": "Инициация платежа: POST /payments",
+            "endpointPath": "/payments",
+            "endpointMethod": "POST",
+            "operationId": "create_payment_payments_post",
+            "confidenceScore": 0.95,
+            "matchingStrategy": "EXACT",
+            "recommendation": "Высокая уверенность в сопоставлении",
+            "customRequestData": null
+        },
+        "VIRTUAL_DEP_2": {
+            "taskId": "VIRTUAL_DEP_2",
+            "taskName": "1. Получить каталог продуктов",
+            "endpointPath": "/products",
+            "endpointMethod": "GET",
+            "operationId": "get_products_products_get",
+            "confidenceScore": 1.0,
+            "matchingStrategy": "DEPENDENCY_AUTO",
+            "recommendation": "Автоматически добавлено как зависимость для другого эндпоинта",
+            "customRequestData": null
+        },
+        "VIRTUAL_DEP_3": {
+            "taskId": "VIRTUAL_DEP_3",
+            "taskName": "2. Открыть продукт",
+            "endpointPath": "/product-agreements",
+            "endpointMethod": "POST",
+            "operationId": "create_agreement_product_agreements_post",
+            "confidenceScore": 1.0,
+            "matchingStrategy": "DEPENDENCY_AUTO",
+            "recommendation": "Автоматически добавлено как зависимость для другого эндпоинта",
+            "customRequestData": null
+        }
+    },
+    "dataFlowEdges": [
+        {
+            "sourceTaskId": "Task_01_Auth",
+            "targetTaskId": "Task_01_GetAccs",
+            "fields": [
+                "data"
+            ],
+            "confidence": 0.5,
+            "parameterMappings": {}
+        },
+        {
+            "sourceTaskId": "Task_01_GetAccs",
+            "targetTaskId": "Task_01_GetBal",
+            "fields": [
+                "id",
+                "data"
+            ],
+            "confidence": 0.7,
+            "parameterMappings": {}
+        },
+        {
+            "sourceTaskId": "Task_01_GetBal",
+            "targetTaskId": "Task_01_InitPay",
+            "fields": [
+                "account_id",
+                "id",
+                "data"
+            ],
+            "confidence": 0.7,
+            "parameterMappings": {}
+        },
+        {
+            "sourceTaskId": "Task_01_InitPay",
+            "targetTaskId": "Task_01_CheckPay",
+            "fields": [
+                "data"
+            ],
+            "confidence": 0.7,
+            "parameterMappings": {}
+        },
+        {
+            "sourceTaskId": "Task_01_GetAccs",
+            "targetTaskId": "Task_01_GetAccs",
+            "fields": [
+                "id",
+                "data"
+            ],
+            "confidence": 0.9,
+            "parameterMappings": {}
+        },
+        {
+            "sourceTaskId": "VIRTUAL_DEP_1",
+            "targetTaskId": "Task_01_GetAccs",
+            "fields": [
+                "id",
+                "data"
+            ],
+            "confidence": 0.9,
+            "parameterMappings": {}
+        },
+        {
+            "sourceTaskId": "VIRTUAL_DEP_1",
+            "targetTaskId": "Task_01_GetAccs",
+            "fields": [
+                "consent-id"
+            ],
+            "confidence": 0.95,
+            "parameterMappings": {
+                "x-consent-id": {
+                    "parameterName": "x-consent-id",
+                    "parameterIn": "header",
+                    "sourceField": "consent-id",
+                    "fieldHint": "consent-id"
+                }
+            }
+        },
+        {
+            "sourceTaskId": "VIRTUAL_DEP_1",
+            "targetTaskId": "Task_01_GetBal",
+            "fields": [
+                "consent-id"
+            ],
+            "confidence": 0.95,
+            "parameterMappings": {
+                "x-consent-id": {
+                    "parameterName": "x-consent-id",
+                    "parameterIn": "header",
+                    "sourceField": "consent-id",
+                    "fieldHint": "consent-id"
+                }
+            }
+        },
+        {
+            "sourceTaskId": "VIRTUAL_DEP_2",
+            "targetTaskId": "VIRTUAL_DEP_2",
+            "fields": [
+                "id",
+                "data"
+            ],
+            "confidence": 0.9,
+            "parameterMappings": {}
+        },
+        {
+            "sourceTaskId": "VIRTUAL_DEP_3",
+            "targetTaskId": "VIRTUAL_DEP_2",
+            "fields": [
+                "id",
+                "data"
+            ],
+            "confidence": 0.9,
+            "parameterMappings": {}
+        },
+        {
+            "sourceTaskId": "Task_01_CheckPay",
+            "targetTaskId": "Task_01_InitPay",
+            "fields": [
+                "entification"
+            ],
+            "confidence": 0.9,
+            "parameterMappings": {}
+        },
+        {
+            "sourceTaskId": "Task_01_GetBal",
+            "targetTaskId": "Task_01_InitPay",
+            "fields": [
+                "entification"
+            ],
+            "confidence": 0.9,
+            "parameterMappings": {}
+        }
+    ],
+    "unmatchedTasks": [],
+    "overallConfidence": 1.3475,
+    "totalTasks": 5,
+    "matchedTasks": 5,
+    "totalEndpoints": 28,
+    "matchedEndpoints": 8,
+    "commonFields": [
+        {
+            "fieldName": "x-requesting-bank",
+            "fieldType": "header",
+            "usageCount": 11,
+            "usedInEndpoints": [
+                "GET /accounts/{account_id}",
+                "GET /accounts",
+                "GET /product-agreements",
+                "POST /product-agreements",
+                "POST /payments",
+                "GET /accounts/{account_id}/transactions",
+                "POST /account-consents/request",
+                "POST /payment-consents/request",
+                "DELETE /product-agreements/{agreement_id}",
+                "GET /accounts/{account_id}/balances",
+                "GET /product-agreements/{agreement_id}"
+            ],
+            "required": false,
+            "description": "ID вашей команды (от организаторов). Укажите для запроса данных из другого банка",
+            "dataType": null
+        },
+        {
+            "fieldName": "client_id",
+            "fieldType": "query",
+            "usageCount": 8,
+            "usedInEndpoints": [
+                "POST /product-agreement-consents/request",
+                "GET /accounts",
+                "GET /product-agreements",
+                "POST /product-agreements",
+                "POST /payments",
+                "POST /auth/bank-token",
+                "DELETE /product-agreements/{agreement_id}",
+                "GET /product-agreements/{agreement_id}"
+            ],
+            "required": true,
+            "description": "ID команды от организаторов",
+            "dataType": "string"
+        },
+        {
+            "fieldName": "account_id",
+            "fieldType": "path",
+            "usageCount": 5,
+            "usedInEndpoints": [
+                "GET /accounts/{account_id}",
+                "GET /accounts/{account_id}/transactions",
+                "PUT /accounts/{account_id}/close",
+                "GET /accounts/{account_id}/balances",
+                "PUT /accounts/{account_id}/status"
+            ],
+            "required": true,
+            "description": "ID счета",
+            "dataType": "string"
+        },
+        {
+            "fieldName": "x-product-agreement-consent-id",
+            "fieldType": "header",
+            "usageCount": 4,
+            "usedInEndpoints": [
+                "GET /product-agreements",
+                "POST /product-agreements",
+                "DELETE /product-agreements/{agreement_id}",
+                "GET /product-agreements/{agreement_id}"
+            ],
+            "required": false,
+            "description": null,
+            "dataType": null
+        },
+        {
+            "fieldName": "x-fapi-interaction-id",
+            "fieldType": "header",
+            "usageCount": 4,
+            "usedInEndpoints": [
+                "POST /payments",
+                "GET /payments/{payment_id}",
+                "DELETE /account-consents/{consent_id}",
+                "GET /account-consents/{consent_id}"
+            ],
+            "required": false,
+            "description": "(Опционально) ID вашей транзакции для отслеживания",
+            "dataType": null
+        },
+        {
+            "fieldName": "agreement_id",
+            "fieldType": "path",
+            "usageCount": 2,
+            "usedInEndpoints": [
+                "DELETE /product-agreements/{agreement_id}",
+                "GET /product-agreements/{agreement_id}"
+            ],
+            "required": true,
+            "description": null,
+            "dataType": "string"
+        }
+    ],
+    "secretFields": [
+        {
+            "fieldName": "client_secret",
+            "fieldType": "query",
+            "description": "Secret команды от организаторов",
+            "dataType": "string",
+            "required": true,
+            "usedInEndpoints": [
+                "POST /auth/bank-token"
+            ],
+            "reason": "Field name matches secret pattern: (?i).*secret.*"
+        }
+    ],
+    "aiVerificationReport": {
+        "openapi": {
+            "status": "warning",
+            "errors": [],
+            "warnings": [
+                "ИИ анализ выполнен, но результат не удалось распарсить"
+            ],
+            "suggestions": [
+                "ИИ анализ: }\n\nОшибка:\n\nОбнаружил ошибку \"Недостаточно полных параметров\" в методе POST \"/auth/bank-token\". Значения запроса не указаны.\n\nПроблемы:\n1. **Недостаточно полных параметров**: Неправильные значения пар"
+            ],
+            "summary": "1 предупреждений, 1 рекомендаций"
+        },
+        "bpmn": {
+            "status": "warning",
+            "errors": [],
+            "warnings": [
+                "ИИ анализ выполнен, но результат не удалось распарсить"
+            ],
+            "suggestions": [
+                "ИИ анализ: Для начала, я построю BPMN процесс, чтобы он мог бы анализировать свои ошибки, предупреждения и рекомендации.\n\n```xml\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<definitions xmlns=\"http://www.omg.org/spec"
+            ],
+            "summary": "1 предупреждений, 1 рекомендаций"
+        },
+        "overallStatus": "warning",
+        "totalErrors": 0,
+        "totalWarnings": 2,
+        "totalSuggestions": 2
+    }
+}

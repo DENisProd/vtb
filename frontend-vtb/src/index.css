@@ -1,0 +1,125 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+:root {
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color-scheme: light;
+  --app-bg: #e6f2ff;
+  --app-bg-alt: #f5f9ff;
+  --app-surface: #ffffff;
+  --app-surface-strong: #ffffff;
+  --app-border: rgba(0, 60, 177, 0.25);
+  --app-primary: #003cb1;
+  --app-primary-strong: #002e82;
+  --app-on-primary: #ffffff;
+  --app-text: #0f1f3f;
+  --app-muted: #5f6c92;
+  --grid-dot: rgba(0, 60, 177, 0.12);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --app-bg: #002760;
+  --app-bg-alt: #001839;
+  --app-surface: rgba(0, 32, 96, 0.6);
+  --app-surface-strong: rgba(0, 32, 96, 0.85);
+  --app-border: rgba(0, 166, 255, 0.25);
+  --app-primary: #00a6ff;
+  --app-primary-strong: #0087cc;
+  --app-on-primary: #001226;
+  --app-text: #f3f7ff;
+  --app-muted: #b5c8ff;
+  --grid-dot: rgba(255, 255, 255, 0.12);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--app-bg);
+  color: var(--app-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.app-shell {
+  background-color: var(--app-bg);
+  color: var(--app-text);
+}
+
+.app-card {
+  background-color: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: 1.25rem;
+  backdrop-filter: blur(18px);
+  box-shadow: 0 8px 24px rgba(0, 44, 120, 0.06);
+}
+
+.app-card-strong {
+  background-color: var(--app-surface-strong);
+  border: 1px solid var(--app-border);
+  border-radius: 1.25rem;
+  backdrop-filter: blur(18px);
+  box-shadow: 0 10px 28px rgba(0, 44, 120, 0.08);
+}
+
+.btn-primary {
+  background-color: var(--app-primary) !important;
+  border: 1px solid var(--app-primary) !important;
+  color: var(--app-on-primary) !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--app-primary-strong) !important;
+}
+
+.btn-outline {
+  background-color: transparent !important;
+  color: var(--app-primary) !important;
+  border: 1px solid var(--app-primary) !important;
+}
+
+.btn-ghost {
+  background-color: transparent !important;
+  color: var(--app-primary) !important;
+}
+
+.nav-button {
+  width: 100%;
+  justify-content: flex-start;
+  border-radius: 0.85rem;
+  font-weight: 500;
+}
+
+.nav-button--idle {
+  color: var(--app-text);
+}
+
+.nav-button--active {
+  background-color: color-mix(in srgb, var(--app-primary) 18%, transparent);
+  color: var(--app-on-primary);
+}
+
+.text-muted {
+  color: var(--app-muted);
+}
+
+.surface-border {
+  border-color: var(--app-border) !important;
+}
+
+.canvas-grid-bg {
+  background-image: radial-gradient(circle at 1px 1px, var(--grid-dot) 1px, transparent 1px);
+  background-size: 16px 16px;
+}

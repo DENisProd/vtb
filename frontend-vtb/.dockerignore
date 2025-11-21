@@ -1,0 +1,14 @@
+# Prevent unnecessary files from being sent to the Docker build context
+node_modules
+dist
+.git
+.gitignore
+.DS_Store
+*.log
+
+# Exclude backend
+backend/
+
+# Local env/venv
+venv/
+.env

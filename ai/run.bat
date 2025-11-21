@@ -1,0 +1,1 @@
+python orchestra_core.py --openapi-url https://abank.open.bankingapi.ru/openapi.json --bpmn-file ./bpmn/bpmn/01_bonus_payment.bpmn

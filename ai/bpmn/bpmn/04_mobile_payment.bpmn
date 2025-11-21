@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_04"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="Process_04_mobile_payment" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_04" name="Клиент вводит номер и сумму">
+      <bpmn:outgoing>Flow_04_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_04_Auth" name="Аутентификация: POST /auth/bank-token">
+      <bpmn:incoming>Flow_04_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_04_2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_04_ExtProv" name="Внешний вызов: Определение провайдера">
+      <bpmn:incoming>Flow_04_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_04_3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_04_GetDetails" name="Получение реквизитов провайдера">
+      <bpmn:incoming>Flow_04_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_04_4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_04_GetAccs" name="Получение списка счетов: GET /accounts">
+      <bpmn:incoming>Flow_04_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_04_5</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_04_InitPay" name="Инициация платежа: POST /payments (мобильный)">
+      <bpmn:incoming>Flow_04_5</bpmn:incoming>
+      <bpmn:outgoing>Flow_04_6</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="EndEvent_04" name="Платёж за связь выполнен">
+      <bpmn:incoming>Flow_04_6</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_04_1" sourceRef="StartEvent_04" targetRef="Task_04_Auth"/>
+    <bpmn:sequenceFlow id="Flow_04_2" sourceRef="Task_04_Auth" targetRef="Task_04_ExtProv"/>
+    <bpmn:sequenceFlow id="Flow_04_3" sourceRef="Task_04_ExtProv" targetRef="Task_04_GetDetails"/>
+    <bpmn:sequenceFlow id="Flow_04_4" sourceRef="Task_04_GetDetails" targetRef="Task_04_GetAccs"/>
+    <bpmn:sequenceFlow id="Flow_04_5" sourceRef="Task_04_GetAccs" targetRef="Task_04_InitPay"/>
+    <bpmn:sequenceFlow id="Flow_04_6" sourceRef="Task_04_InitPay" targetRef="EndEvent_04"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_04">
+    <bpmndi:BPMNPlane id="BPMNPlane_04" bpmnElement="Process_04_mobile_payment">
+      <bpmndi:BPMNShape id="StartEvent_04_di" bpmnElement="StartEvent_04">
+        <dc:Bounds x="100" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_04_Auth_di" bpmnElement="Task_04_Auth">
+        <dc:Bounds x="200" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_04_ExtProv_di" bpmnElement="Task_04_ExtProv">
+        <dc:Bounds x="350" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_04_GetDetails_di" bpmnElement="Task_04_GetDetails">
+        <dc:Bounds x="500" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_04_GetAccs_di" bpmnElement="Task_04_GetAccs">
+        <dc:Bounds x="650" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_04_InitPay_di" bpmnElement="Task_04_InitPay">
+        <dc:Bounds x="800" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_04_di" bpmnElement="EndEvent_04">
+        <dc:Bounds x="950" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_04_1_di" bpmnElement="Flow_04_1">
+        <di:waypoint x="136" y="218"/>
+        <di:waypoint x="200" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_04_2_di" bpmnElement="Flow_04_2">
+        <di:waypoint x="300" y="218"/>
+        <di:waypoint x="350" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_04_3_di" bpmnElement="Flow_04_3">
+        <di:waypoint x="450" y="218"/>
+        <di:waypoint x="500" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_04_4_di" bpmnElement="Flow_04_4">
+        <di:waypoint x="600" y="218"/>
+        <di:waypoint x="650" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_04_5_di" bpmnElement="Flow_04_5">
+        <di:waypoint x="750" y="218"/>
+        <di:waypoint x="800" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_04_6_di" bpmnElement="Flow_04_6">
+        <di:waypoint x="900" y="218"/>
+        <di:waypoint x="950" y="218"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_13"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="Process_13_product_details" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_13" name="Клиент кликает на продукт">
+      <bpmn:outgoing>Flow_13_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_13_GetProdDet" name="Получение деталей продукта: GET /products/{product_id}">
+      <bpmn:incoming>Flow_13_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_13_2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="EndEvent_13" name="Детали продукта отображены">
+      <bpmn:incoming>Flow_13_2</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_13_1" sourceRef="StartEvent_13" targetRef="Task_13_GetProdDet"/>
+    <bpmn:sequenceFlow id="Flow_13_2" sourceRef="Task_13_GetProdDet" targetRef="EndEvent_13"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_13">
+    <bpmndi:BPMNPlane id="BPMNPlane_13" bpmnElement="Process_13_product_details">
+      <bpmndi:BPMNShape id="StartEvent_13_di" bpmnElement="StartEvent_13">
+        <dc:Bounds x="100" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_13_GetProdDet_di" bpmnElement="Task_13_GetProdDet">
+        <dc:Bounds x="200" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_13_di" bpmnElement="EndEvent_13">
+        <dc:Bounds x="350" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_13_1_di" bpmnElement="Flow_13_1">
+        <di:waypoint x="136" y="218"/>
+        <di:waypoint x="200" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_13_2_di" bpmnElement="Flow_13_2">
+        <di:waypoint x="300" y="218"/>
+        <di:waypoint x="350" y="218"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

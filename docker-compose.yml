@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  # Сервис для предзагрузки модели ИИ
+  
+  nginx:
+    image: nginx:alpine
+    container_name: vtb-nginx
+    environment:
+      - BACKEND_HOST=${BACKEND_HOST}
+      - BACKEND_PORT=${BACKEND_PORT}
+      - API_PREFIX=${API_PREFIX}
+      - WS_PATH=${WS_PATH}
+      - CLIENT_MAX_BODY_SIZE=${CLIENT_MAX_BODY_SIZE}
+    ports:
+      - "${NGINX_HOST_PORT}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf.template:ro
+      - frontend_dist:/usr/share/nginx/html:ro
+    # depends_on:
+    #   - backend
+    command: /bin/sh -c "envsubst '$${BACKEND_HOST} $${BACKEND_PORT} $${API_PREFIX} $${WS_PATH} $${CLIENT_MAX_BODY_SIZE}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
+
+  frontend-build:
+    build:
+      context: ./frontend-vtb
+      target: build
+    volumes:
+      - frontend_dist:/out
+    command: sh -c "cp -r /app/dist/* /out/ || true && ls -la /out && echo 'Build copied to volume'"
+
+  mongo:
+    image: mongo:latest
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_DB_NAME}
+    ports:
+      - "${MONGO_PORT}:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  frontend_dist: {}
+  mongo-data:
+  model-cache:
+    driver: local

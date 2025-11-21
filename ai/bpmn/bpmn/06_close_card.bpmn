@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_06"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="Process_06_close_card" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_06" name="Клиент решает закрыть карту с нулевым балансом">
+      <bpmn:outgoing>Flow_06_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_06_Auth" name="Аутентификация: POST /auth/bank-token">
+      <bpmn:incoming>Flow_06_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_06_2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_06_GetAccs" name="Получение списка счетов: GET /accounts">
+      <bpmn:incoming>Flow_06_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_06_3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_06_CheckBal" name="Проверка баланса: GET /accounts/{account_id}/balances">
+      <bpmn:incoming>Flow_06_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_06_4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_06_CloseAcc" name="Закрытие счёта: PUT /accounts/{account_id}/status (status: closed)">
+      <bpmn:incoming>Flow_06_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_06_5</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="EndEvent_06" name="Счёт карты закрыт">
+      <bpmn:incoming>Flow_06_5</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_06_1" sourceRef="StartEvent_06" targetRef="Task_06_Auth"/>
+    <bpmn:sequenceFlow id="Flow_06_2" sourceRef="Task_06_Auth" targetRef="Task_06_GetAccs"/>
+    <bpmn:sequenceFlow id="Flow_06_3" sourceRef="Task_06_GetAccs" targetRef="Task_06_CheckBal"/>
+    <bpmn:sequenceFlow id="Flow_06_4" sourceRef="Task_06_CheckBal" targetRef="Task_06_CloseAcc"/>
+    <bpmn:sequenceFlow id="Flow_06_5" sourceRef="Task_06_CloseAcc" targetRef="EndEvent_06"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_06">
+    <bpmndi:BPMNPlane id="BPMNPlane_06" bpmnElement="Process_06_close_card">
+      <bpmndi:BPMNShape id="StartEvent_06_di" bpmnElement="StartEvent_06">
+        <dc:Bounds x="100" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_06_Auth_di" bpmnElement="Task_06_Auth">
+        <dc:Bounds x="200" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_06_GetAccs_di" bpmnElement="Task_06_GetAccs">
+        <dc:Bounds x="350" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_06_CheckBal_di" bpmnElement="Task_06_CheckBal">
+        <dc:Bounds x="500" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_06_CloseAcc_di" bpmnElement="Task_06_CloseAcc">
+        <dc:Bounds x="650" y="188" width="100" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_06_di" bpmnElement="EndEvent_06">
+        <dc:Bounds x="800" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_06_1_di" bpmnElement="Flow_06_1">
+        <di:waypoint x="136" y="218"/>
+        <di:waypoint x="200" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_06_2_di" bpmnElement="Flow_06_2">
+        <di:waypoint x="300" y="218"/>
+        <di:waypoint x="350" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_06_3_di" bpmnElement="Flow_06_3">
+        <di:waypoint x="450" y="218"/>
+        <di:waypoint x="500" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_06_4_di" bpmnElement="Flow_06_4">
+        <di:waypoint x="600" y="218"/>
+        <di:waypoint x="650" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_06_5_di" bpmnElement="Flow_06_5">
+        <di:waypoint x="750" y="218"/>
+        <di:waypoint x="800" y="218"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,8 @@
+ru\poib\VTBHack\VtbHackApplicationTests.class
+ru\poib\VTBHack\generator\service\SmartFieldGeneratorTest.class
+ru\poib\VTBHack\mapping\service\MappingServiceTest.class
+ru\poib\VTBHack\generator\TestDataGeneratorServiceTest.class
+ru\poib\VTBHack\generator\service\RussianDataGeneratorTest.class
+ru\poib\VTBHack\parser\service\PlantUmlParserServiceTest.class
+ru\poib\VTBHack\parser\service\OpenApiParserServiceTest.class
+ru\poib\VTBHack\parser\service\BpmnParserServiceTest.class
